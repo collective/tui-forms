@@ -16,8 +16,8 @@ This guide walks you through setting up a local development environment, running
 You need the following tools installed on your machine:
 
 - [Git](https://git-scm.com/)
-- [uv](https://docs.astral.sh/uv/) — the project's package and environment manager
-- [make](https://www.gnu.org/software/make/) — used to run all development tasks
+- [uv](https://docs.astral.sh/uv/): the project's package and environment manager
+- [make](https://www.gnu.org/software/make/): used to run all development tasks
 
 ## Set up the development environment
 
@@ -145,7 +145,7 @@ make check
 ```
 
 This runs `make format` followed by `make lint`.
-After that, run type-checking separately:
+After that, run type-checking:
 
 ```console
 make lint-mypy

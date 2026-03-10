@@ -11,7 +11,7 @@ myst:
 
 **Schema-driven form wizards for the terminal.**
 
-`tui-forms` lets you define a form once using {term}`JSONSchema` — field types, validation rules, and defaults — and renders it as a guided, step-by-step wizard in the terminal.
+`tui-forms` lets you define a form once using {term}`JSONSchema` (field types, validation rules, and defaults) and renders it as a guided, step-by-step wizard in the terminal.
 It supports pluggable renderer backends, from a zero-dependency stdlib implementation to rich, styled experiences powered by third-party libraries.
 
 This documentation is structured following the [Diátaxis](https://diataxis.fr/) framework.

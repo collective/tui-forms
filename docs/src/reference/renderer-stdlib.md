@@ -1,8 +1,8 @@
 ---
 myst:
   html_meta:
-    "description": "Reference for the stdlib renderer — how each question type is presented in the terminal using only the Python standard library."
-    "property=og:description": "Reference for the stdlib renderer — how each question type is presented in the terminal using only the Python standard library."
+    "description": "Reference for the stdlib renderer—how each question type is presented in the terminal using only the Python standard library."
+    "property=og:description": "Reference for the stdlib renderer—how each question type is presented in the terminal using only the Python standard library."
     "property=og:title": "stdlib renderer"
     "keywords": "tui-forms, reference, stdlib, renderer, terminal, prompts, questions"
 ---

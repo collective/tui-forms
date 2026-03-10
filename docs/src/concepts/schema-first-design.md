@@ -18,12 +18,12 @@ Most CLI tools and terminal scaffolding utilities ask questions by writing imper
 call `input()`, check the value, branch, call `input()` again.
 This approach works for a handful of questions, but it does not scale.
 As the form grows, the logic for defaults, validation, conditional questions, and output formatting becomes tangled with the I/O code.
-Switching the output style — say, from plain `input()` to a styled `rich` prompt — requires rewriting or duplicating the entire interaction flow.
+Switching the output style—say, from plain `input()` to a styled `rich` prompt—requires rewriting or duplicating the entire interaction flow.
 
 ## The solution
 
 TUI Forms separates the *definition* of a form from its *rendering*.
-You describe the form once in a {term}`JSONSchema` document — field names, types, titles, defaults, choices, and conditions.
+You describe the form once in a {term}`JSONSchema` document—field names, types, titles, defaults, choices, and conditions.
 TUI Forms reads that document, builds an internal `Form` object, and hands it to a renderer.
 The renderer is responsible only for I/O; it knows nothing about the schema.
 
@@ -45,7 +45,7 @@ A shared schema can power multiple tools.
 Schema files can be validated, documented, and edited with existing tooling, without any knowledge of TUI Forms internals.
 
 **Computed and conditional fields.**
-Because all field metadata lives in the schema, TUI Forms can apply {term}`Jinja2` templates to defaults and evaluate `if/then` conditions in a single, predictable pass — after all user-facing questions have been answered.
+Because all field metadata lives in the schema, TUI Forms can apply {term}`Jinja2` templates to defaults and evaluate `if/then` conditions in a single, predictable pass—after all user-facing questions have been answered.
 No branching logic leaks into your application code.
 
 ## The rendering pipeline

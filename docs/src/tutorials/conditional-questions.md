@@ -13,7 +13,7 @@ In this tutorial you will build a form that shows extra questions only when a
 previous answer matches a specific value.
 
 This is useful for branching forms where some options require additional
-configuration — for example, enabling a feature and then asking for its
+configuration—for example, enabling a feature and then asking for its
 settings.
 
 ## What you will build
@@ -21,7 +21,7 @@ settings.
 A deployment configuration form that:
 
 1. Asks which **authentication provider** to use (`none` or `oidc`).
-2. Shows two extra questions — **OIDC server URL** and **client ID** — only when
+2. Shows two extra questions—**OIDC server URL** and **client ID**—only when
    the user selects `oidc`.
 
 ## Prerequisites
@@ -43,14 +43,14 @@ TUI Forms uses the standard JSONSchema `allOf` / `if` / `then` pattern.
 
 When the user's answer for `key` equals `expected_value`, the questions inside
 `then.properties` become active.
-Otherwise they are skipped entirely — they will not appear in the returned
+Otherwise they are skipped entirely—they will not appear in the returned
 answers dict.
 
 The `if` condition must follow the pattern
 `{properties: {key: {const: value}}}`.
 Only a single key–value pair per `if` block is supported.
 
-## Step 1 — Define the base question
+## Step 1—Define the base question
 
 Start with the choice question that controls the branching:
 
@@ -71,7 +71,7 @@ schema = {
 }
 ```
 
-## Step 2 — Add the conditional block
+## Step 2—Add the conditional block
 
 Append an `allOf` list at the top level of the schema (alongside `properties`).
 Each item has an `if` condition and a `then` block with the extra questions:
@@ -100,7 +100,7 @@ schema = {
                     "oidc_server_url": {
                         "type": "string",
                         "title": "OIDC server URL",
-                        "description": "e.g. https://auth.example.com/realms/myrealm",
+                        "description": "for example, https://auth.example.com/realms/myrealm",
                         "default": "",
                     },
                     "oidc_client_id": {
@@ -115,7 +115,7 @@ schema = {
 }
 ```
 
-## Step 3 — Run the form
+## Step 3—Run the form
 
 ```python
 from tui_forms import create_renderer
@@ -125,7 +125,7 @@ answers = renderer.render()
 print(answers)
 ```
 
-## Step 4 — Try both branches
+## Step 4—Try both branches
 
 Run the script and select **None** first:
 
@@ -172,5 +172,5 @@ Each item is evaluated independently:
 
 ## Next steps
 
-- {doc}`hidden-fields` — derive values automatically from what the user answered.
-- {doc}`/reference/jsonschema-support` — full reference for conditional fields and `$ref` resolution.
+- {doc}`hidden-fields`: derive values automatically from what the user answered.
+- {doc}`/reference/jsonschema-support`: full reference for conditional fields and `$ref` resolution.

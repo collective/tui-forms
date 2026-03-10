@@ -15,14 +15,14 @@ Forms re-prompts the user until they enter an acceptable value.
 TUI Forms already ships with built-in validators for `format: email`,
 `format: date`, `format: date-time`, and `format: data-url`.
 This tutorial shows how to enforce a rule that none of the built-in formats
-cover — for example, requiring a TCP port number in the range 1024–65535.
+cover—for example, requiring a TCP port number in the range 1024–65535.
 
 ## What you will build
 
 A server configuration form with two questions:
 
-1. **Host name** — free text, no special validation.
-2. **Port** — integer; must be between 1024 and 65535 inclusive.
+1. **Host name**: free text, no special validation.
+2. **Port**: integer; must be between 1024 and 65535 inclusive.
 
 If the user types an invalid port, TUI Forms re-prompts immediately.
 
@@ -47,7 +47,7 @@ If it returns `False`, `_validation_error()` is called and the question is
 asked again.
 This loop repeats until the validator returns `True`.
 
-## Step 1 — Parse the schema
+## Step 1—Parse the schema
 
 The `create_renderer` convenience function does not expose individual question
 objects, so you need to call `jsonschema_to_form` directly to get the
@@ -76,7 +76,7 @@ schema = {
 frm = jsonschema_to_form(schema)
 ```
 
-## Step 2 — Write the validator
+## Step 2—Write the validator
 
 A validator is any callable that takes a `str` and returns a `bool`.
 A plain function works perfectly:
@@ -91,7 +91,7 @@ def is_valid_port(value: str) -> bool:
     return 1024 <= port <= 65535
 ```
 
-## Step 3 — Attach the validator to the question
+## Step 3—Attach the validator to the question
 
 Iterate over `frm.questions` to find the `port` question and set its
 `validator` attribute:
@@ -105,7 +105,7 @@ for question in frm.questions:
 
 `question.validator` is a plain dataclass field, so assigning to it is safe.
 
-## Step 4 — Create the renderer and run the form
+## Step 4—Create the renderer and run the form
 
 Pass the modified `Form` directly to the renderer constructor.
 The `stdlib` renderer is available at `tui_forms.renderer.stdlib`:
@@ -248,7 +248,7 @@ Use this approach when:
 
 Use the programmatic approach (setting `question.validator` directly) when:
 
-- the validator is a lambda or a locally-defined function
+- the validator is a lambda or a locally defined function
 - you need to pass configuration to the validator at runtime
 
 ## Built-in format validators
@@ -269,7 +269,7 @@ See {doc}`/reference/jsonschema-support` for examples of each.
 
 ## Next steps
 
-- {doc}`/how-to-guides/create-renderer` — implement a custom renderer that shows
+- {doc}`/how-to-guides/create-renderer`: implement a custom renderer that shows
   richer validation error messages.
-- {doc}`/reference/base-renderer` — full reference for `BaseRenderer`,
+- {doc}`/reference/base-renderer`: full reference for `BaseRenderer`,
   `AnswerValidator`, and the rendering pipeline.

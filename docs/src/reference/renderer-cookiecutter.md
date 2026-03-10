@@ -1,8 +1,8 @@
 ---
 myst:
   html_meta:
-    "description": "Reference for the cookiecutter renderer — how each question type is presented in the cookiecutter prompt style using Rich."
-    "property=og:description": "Reference for the cookiecutter renderer — how each question type is presented in the cookiecutter prompt style using Rich."
+    "description": "Reference for the cookiecutter renderer—how each question type is presented in the cookiecutter prompt style using Rich."
+    "property=og:description": "Reference for the cookiecutter renderer—how each question type is presented in the cookiecutter prompt style using Rich."
     "property=og:title": "cookiecutter renderer"
     "keywords": "tui-forms, reference, cookiecutter, renderer, terminal, styled, prompts"
 ---
@@ -104,7 +104,7 @@ have a leading space. The selection prompt shows the default as a comma-separate
     Choose one or more from [1/2/3], comma-separated (1):
 ```
 
-*The user types comma-separated numbers (e.g. `1,3`) and presses Enter,
+*The user types comma-separated numbers (for example, `1,3`) and presses Enter,
 or presses Enter to keep the current selection.*
 
 When no options are pre-selected, the default shows as `none`:

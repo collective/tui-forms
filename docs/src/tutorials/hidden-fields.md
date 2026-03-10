@@ -34,7 +34,7 @@ A package scaffolding form that:
 
 - Complete {doc}`your-first-form` or be familiar with `create_renderer`.
 
-## Step 1 — Add a constant field
+## Step 1—Add a constant field
 
 A constant field stores a fixed value that never changes regardless of what the
 user types.
@@ -57,7 +57,7 @@ schema = {
 `schema_version` will not be asked.
 The returned dict will always contain `{"schema_version": "1"}`.
 
-## Step 2 — Add a user-facing question
+## Step 2—Add a user-facing question
 
 Add the question whose answer the computed field will use:
 
@@ -80,7 +80,7 @@ schema = {
 }
 ```
 
-## Step 3 — Add a computed field
+## Step 3—Add a computed field
 
 A computed field evaluates its `default` as a {term}`Jinja2` template.
 The template context is the answers collected so far, so you can reference any
@@ -116,7 +116,7 @@ schema = {
 The Jinja2 template `{{ project_name | lower | replace('-', '_') | replace(' ', '_') }}`
 takes the `project_name` answer and transforms it into a valid Python identifier.
 
-## Step 4 — Run the form
+## Step 4—Run the form
 
 ```python
 from tui_forms import create_renderer
@@ -175,12 +175,12 @@ Each element (or value) is rendered as a Jinja2 template independently:
 ## Order matters
 
 Hidden fields are resolved **after** all user-facing questions have been
-answered, so a computed field can reference any answer — regardless of where it
+answered, so a computed field can reference any answer—regardless of where it
 appears in `properties`.
 
 ## Next steps
 
-- {doc}`conditional-questions` — combine hidden fields with conditions so that a
+- {doc}`conditional-questions`: combine hidden fields with conditions so that a
   computed field is only resolved when a specific branch is active.
-- {doc}`/reference/jsonschema-support` — full reference for `format: constant`,
+- {doc}`/reference/jsonschema-support`: full reference for `format: constant`,
   `format: computed`, and Jinja2 defaults.

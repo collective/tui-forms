@@ -1,8 +1,8 @@
 ---
 myst:
   html_meta:
-    "description": "API reference for BaseRenderer — the abstract base class that all TUI Forms renderer backends extend."
-    "property=og:description": "API reference for BaseRenderer — the abstract base class that all TUI Forms renderer backends extend."
+    "description": "API reference for BaseRenderer—the abstract base class that all TUI Forms renderer backends extend."
+    "property=og:description": "API reference for BaseRenderer—the abstract base class that all TUI Forms renderer backends extend."
     "property=og:title": "BaseRenderer reference"
     "keywords": "tui-forms, reference, BaseRenderer, API, renderer, abstract, _ask_string, _ask_boolean, _ask_choice, _ask_multiple"
 ---
@@ -12,7 +12,7 @@ myst:
 `BaseRenderer` is the abstract base class that all TUI Forms renderer backends extend.
 It lives in `tui_forms.renderer.base`.
 
-The class provides the complete rendering pipeline — question ordering, condition evaluation, {term}`Jinja2` default rendering, and hidden-field resolution — while delegating all terminal I/O to five abstract methods that each concrete renderer must implement.
+The class provides the complete rendering pipeline—question ordering, condition evaluation, {term}`Jinja2` default rendering, and hidden-field resolution—while delegating all terminal I/O to five abstract methods that each concrete renderer must implement.
 
 ## Class definition
 
@@ -35,7 +35,7 @@ def __init__(self, frm: form.Form, config: dict[str, Any] | None = None) -> None
 | `frm` | `form.Form` | The parsed form to render. Produced by `jsonschema_to_form` or `create_renderer`. |
 | `config` | `dict \| None` | Optional {term}`Jinja2` environment configuration. See [Jinja2 configuration](#jinja2-configuration) below. |
 
-You do not normally call this directly — use {func}`tui_forms.create_renderer` instead.
+You do not normally call this directly—use {func}`tui_forms.create_renderer` instead.
 
 ## Public method
 
@@ -75,7 +75,7 @@ Called for fields with `type: string`, `type: integer`, or `type: number`.
 |---|---|---|
 | `question` | `BaseQuestion` | The question to ask. See [BaseQuestion attributes](#basequestion-attributes). |
 | `default` | `Any` | The pre-rendered default value, or `None` if no default was set. |
-| `prefix` | `str` | Progress prefix (e.g. `"[1/5] "`) to display before the question title. |
+| `prefix` | `str` | Progress prefix (for example, `"[1/5] "`) to display before the question title. |
 
 **Returns:** The user's answer as a `str`.
 
@@ -174,7 +174,7 @@ def _format_prefix(self, current: int, total: int) -> str
 ```
 
 Return the progress prefix prepended to each question title.
-The default implementation returns `"[current/total] "` (e.g. `"[3/9] "`).
+The default implementation returns `"[current/total] "` (for example, `"[3/9] "`).
 
 Override this method to change the format or return `""` to suppress the prefix.
 
@@ -187,6 +187,7 @@ Override this method to change the format or return `""` to suppress the prefix.
 
 ---
 
+(basequestion-attributes)=
 ## BaseQuestion attributes
 
 The `question` argument passed to all abstract methods is a `BaseQuestion` instance.
@@ -195,7 +196,7 @@ The following attributes are available to every renderer.
 | Attribute | Type | Description |
 |---|---|---|
 | `key` | `str` | The field key, used as the answer dict key. |
-| `type` | `str` | The field type (e.g. `"string"`, `"boolean"`, `"array"`). |
+| `type` | `str` | The field type (for example, `"string"`, `"boolean"`, `"array"`). |
 | `title` | `str` | The human-readable label to display as the prompt. |
 | `description` | `str` | Optional hint text shown below the title. May be an empty string. |
 | `default` | `Any` | The raw default from the schema (before {term}`Jinja2` rendering). Use the pre-rendered `default` argument instead. |
@@ -232,15 +233,16 @@ BaseQuestion
 │   ├── QuestionChoice    single-choice; default_value() normalises list → scalar
 │   └── QuestionMultiple  multiple-choice; default_value() always returns a list
 └── QuestionHidden        never shown to the user; resolved after all user-facing questions
-    ├── QuestionConstant  returns raw default unchanged — no Jinja2 rendering
+    ├── QuestionConstant  returns raw default unchanged—no Jinja2 rendering
     └── QuestionComputed  renders default as a Jinja2 template (str, list, or dict)
 ```
 
-`type: object` questions are not a separate class — they use `BaseQuestion` with `subquestions` set.
+`type: object` questions are not a separate class—they use `BaseQuestion` with `subquestions` set.
 The pipeline recurses into subquestions without calling any abstract method on the object itself.
 
 ---
 
+(jinja2-configuration)=
 ## Jinja2 configuration
 
 The optional `config` constructor argument lets you customise the {term}`Jinja2` environment used to render default templates.

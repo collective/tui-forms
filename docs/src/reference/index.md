@@ -9,7 +9,7 @@ myst:
 
 # Reference
 
-This section contains reference material for TUI Forms — technical descriptions of supported constructs and how to use them.
+This section contains reference material for TUI Forms—technical descriptions of supported constructs and how to use them.
 
 > Reference guides are technical descriptions of the machinery and how to operate it.
 > Reference material is information-oriented.

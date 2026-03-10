@@ -22,7 +22,7 @@ The table below summarises how a property's `type` and keywords determine the re
 | `type: boolean` | `QuestionBoolean` | Yes |
 | Any scalar type + `oneOf` or `anyOf` | `QuestionChoice` | Yes |
 | `type: array` + `oneOf` or `anyOf` on `items` | `QuestionMultiple` | Yes |
-| `type: object` | *(subquestions)* | No — children are asked |
+| `type: object` | *(subquestions)* | No—children are asked |
 | Any type + `format: constant` | `QuestionConstant` | No |
 | Any type + `format: computed` | `QuestionComputed` | No |
 
@@ -149,7 +149,7 @@ Answers are stored flat (not nested under the object key).
 ## Conditional fields
 
 TUI Forms supports `allOf` blocks with `if/then` pairs.
-A question defined inside a `then` block is only shown — or computed — when the `if` condition matches the current answers.
+A question defined inside a `then` block is only shown—or computed—when the `if` condition matches the current answers.
 
 The `if` condition must follow the pattern `{properties: {key: {const: value}}}`.
 When the user's answer for `key` equals `value`, the `then` questions become active.
@@ -293,7 +293,7 @@ The renderer re-prompts if the value cannot be parsed as `YYYY-MM-DD`.
       "type": "string",
       "format": "date-time",
       "title": "Scheduled at",
-      "description": "ISO 8601 date-time, e.g. 2026-01-15T09:00:00"
+      "description": "ISO 8601 date-time, for example, 2026-01-15T09:00:00"
     }
   }
 }
@@ -348,7 +348,7 @@ schema files).
 When both `format` and `validator` are present, the explicit `validator` key
 takes precedence and the format-based built-in validator is not applied.
 
-`validator` is silently ignored on hidden fields (`format: constant` and
+`validator` is ignored on hidden fields (`format: constant` and
 `format: computed`).
 
 ---

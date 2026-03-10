@@ -14,10 +14,13 @@ myst:
 ```{glossary}
 :sorted: true
 
+TUI
+    Text User Interface.
+
 TUI Forms
 tui-forms
-    [TUI Forms](https://collective.github.io/tui-forms) is a Python library for building interactive, schema-driven form wizards in terminal user interfaces.
-    Define your form once using {term}`JSONSchema` — validation rules, field types, defaults, and all — and TUI Forms handles the rest, rendering a guided step-by-step wizard with full user input handling.
+    TUI Forms is a Python library for building interactive, schema-driven form wizards in terminal user interfaces ({term}`TUI`).
+    Define your form once using {term}`JSONSchema`: validation rules, field types, defaults, and all—and TUI Forms handles the rest, rendering a guided step-by-step wizard with full user input handling.
 
 JSON Schema
 JSONSchema
@@ -36,7 +39,7 @@ rjsf
 
 BaseRenderer
     `BaseRenderer` is the abstract base class that all TUI Forms renderer backends extend.
-    It provides the complete rendering pipeline — question ordering, condition evaluation, and hidden-field resolution — while delegating I/O to the five abstract methods (`_ask_string`, `_ask_boolean`, `_ask_choice`, `_ask_multiple`, `_validation_error`) that each concrete renderer implements.
+    It provides the complete rendering pipeline—question ordering, condition evaluation, and hidden-field resolution—while delegating I/O to the five abstract methods (`_ask_string`, `_ask_boolean`, `_ask_choice`, `_ask_multiple`, `_validation_error`) that each concrete renderer implements.
 
 Diátaxis
     [Diátaxis](https://diataxis.fr/) is a documentation framework that organises content into four distinct types: tutorials, how-to guides, reference, and explanation.
@@ -64,7 +67,7 @@ Cookiecutter
 entry point
     A Python packaging mechanism that lets an installed package advertise named objects to other packages without requiring a direct import dependency.
     Entry points are declared in `pyproject.toml` under `[project.entry-points."group"]` and discovered at runtime using `importlib.metadata`.
-    TUI Forms uses the `tui_forms.renderers` entry-point group so that renderer backends — including third-party ones — can be discovered automatically by name.
+    TUI Forms uses the `tui_forms.renderers` entry-point group so that renderer backends—including third-party ones—can be discovered automatically by name.
 
 Rich
     [Rich](https://rich.readthedocs.io/) is a Python library for rendering styled text, panels, tables, and other rich output in the terminal using ANSI escape codes.

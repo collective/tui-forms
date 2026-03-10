@@ -25,13 +25,13 @@ which organises documentation into four distinct types based on what the reader 
 | **Concepts** | Understanding | *"Why does it work this way?"* |
 
 Each type serves a different reader in a different situation.
-Mixing them — for example, writing explanations inside a reference page — makes documentation harder to use.
+Mixing them—for example, writing explanations inside a reference page—makes documentation harder to use.
 Diátaxis keeps them separate so you can find what you need without reading everything.
 
 ## Why Diátaxis?
 
 Documentation that grows organically tends to blur these boundaries.
-A "guide" might start with a tutorial, drift into explanation, and end with an API reference — useful to the author who wrote it, but disorienting to the reader who arrives mid-task.
+A "guide" might start with a tutorial, drift into explanation, and end with an API reference—useful to the author who wrote it, but disorienting to the reader who arrives mid-task.
 
 By committing to Diátaxis from the start, TUI Forms documentation stays navigable as it grows.
 Each page has a single purpose, and the section it lives in tells you what to expect before you read a word.
@@ -43,7 +43,7 @@ Each page has a single purpose, and the section it lives in tells you what to ex
 *Not yet written.*
 
 Tutorials walk a complete beginner through a self-contained learning experience.
-The goal is understanding, not production use — a tutorial may simplify or omit details to keep the reader moving.
+The goal is understanding, not production use—a tutorial may simplify or omit details to keep the reader moving.
 
 ### How-to guides
 
@@ -52,9 +52,9 @@ Each guide starts from a concrete problem and ends when the problem is solved.
 
 Current guides:
 
-- {doc}`/how-to-guides/use-in-project` — install TUI Forms and render your first form
-- {doc}`/how-to-guides/create-renderer` — implement a custom renderer backend
-- {doc}`/how-to-guides/contribute` — set up a development environment and submit changes
+- {doc}`/how-to-guides/use-in-project`: install TUI Forms and render your first form
+- {doc}`/how-to-guides/create-renderer`: implement a custom renderer backend
+- {doc}`/how-to-guides/contribute`: set up a development environment and submit changes
 
 ### Reference
 
@@ -63,11 +63,11 @@ Reference pages describe the machinery; they do not explain the reasoning behind
 
 Current reference pages:
 
-- {doc}`/reference/jsonschema-support` — which {term}`JSONSchema` constructs TUI Forms recognises
-- {doc}`/reference/base-renderer` — the `BaseRenderer` abstract class and its methods
-- {doc}`/reference/renderer-stdlib` — how the `stdlib` renderer presents each question type
-- {doc}`/reference/renderer-rich` — how the `rich` renderer presents each question type
-- {doc}`/reference/renderer-cookiecutter` — how the `cookiecutter` renderer presents each question type
+- {doc}`/reference/jsonschema-support`: which {term}`JSONSchema` constructs TUI Forms recognises
+- {doc}`/reference/base-renderer`: the `BaseRenderer` abstract class and its methods
+- {doc}`/reference/renderer-stdlib`: how the `stdlib` renderer presents each question type
+- {doc}`/reference/renderer-rich`: how the `rich` renderer presents each question type
+- {doc}`/reference/renderer-cookiecutter`: how the `cookiecutter` renderer presents each question type
 
 ### Concepts
 
@@ -77,14 +77,14 @@ but it will give you the mental model to work effectively with the library.
 
 Current concepts pages:
 
-- {doc}`schema-first-design` — why TUI Forms uses {term}`JSONSchema` as its form definition language
-- {doc}`documentation-structure` — this page
+- {doc}`schema-first-design`: why TUI Forms uses {term}`JSONSchema` as its form definition language
+- {doc}`documentation-structure`: this page
 
 ## How to navigate
 
 **If you are new to TUI Forms** and want to get something working quickly, start with {doc}`/how-to-guides/use-in-project`.
 
-**If you have a specific question** such as "how do I add a conditional field?", go to the Reference section and check {doc}`/reference/jsonschema-support`.
+**If you have a specific question** such as "how do I add a conditional field?," go to the Reference section and check {doc}`/reference/jsonschema-support`.
 
 **If something is not behaving as you expect** and you want to understand the underlying model, read {doc}`schema-first-design`.
 

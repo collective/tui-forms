@@ -98,7 +98,7 @@ print(answers)
 
 | Parameter | Type | Description |
 |---|---|---|
-| `renderer` | `str` | Name of the renderer to use (e.g. `"stdlib"`, `"rich"`). |
+| `renderer` | `str` | Name of the renderer to use (for example, `"stdlib"`, `"rich"`). |
 | `schema` | `dict` | The loaded {term}`JSONSchema` dict describing the form. |
 | `root_key` | `str` | Optional. When set, all answers are nested under this key in the returned dict. |
 
@@ -160,5 +160,5 @@ For example, with `root_key="cookiecutter"`, a computed default would be written
 
 ## Next steps
 
-- {doc}`/reference/jsonschema-support` — full reference for supported schema constructs
-- {doc}`/concepts/schema-first-design` — why TUI Forms uses a schema-first approach
+- {doc}`/reference/jsonschema-support`: full reference for supported schema constructs
+- {doc}`/concepts/schema-first-design`: why TUI Forms uses a schema-first approach

@@ -288,6 +288,9 @@ The constructor accepts an optional `config: dict` forwarded to `create_environm
 6. Typing
    - Run `make lint-mypy` after all changes, fix all reported issues
 
+7. Documentation
+   - After any documentation change, run `make docs-test` and fix all reported errors.
+
 ## Notes on Optional Dependencies
 
 - `rich` — used by `RichRenderer` and `CookiecutterRenderer`; install via `uv sync --all-extras` (or `make sync`)

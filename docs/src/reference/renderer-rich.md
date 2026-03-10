@@ -1,8 +1,8 @@
 ---
 myst:
   html_meta:
-    "description": "Reference for the rich renderer — how each question type is presented inside a styled Rich panel in the terminal."
-    "property=og:description": "Reference for the rich renderer — how each question type is presented inside a styled Rich panel in the terminal."
+    "description": "Reference for the rich renderer—how each question type is presented inside a styled Rich panel in the terminal."
+    "property=og:description": "Reference for the rich renderer—how each question type is presented inside a styled Rich panel in the terminal."
     "property=og:title": "rich renderer"
     "keywords": "tui-forms, reference, rich, renderer, terminal, panel, styled, prompts"
 ---
@@ -139,7 +139,7 @@ Pre-selected items are marked with a bold green `*` and their numbers are shown 
 ╰─────────────────────────────────────────────────────────╯
 ```
 
-*The user types comma-separated numbers (e.g. `1,3`) and presses Enter,
+*The user types comma-separated numbers (for example, `1,3`) and presses Enter,
 or presses Enter to keep the current selection.*
 If the input cannot be parsed, an inline error appears:
 

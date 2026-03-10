@@ -1,0 +1,15 @@
+[Cc]ookiecutter
+[Dd]ataclass(es)?
+[Dd]ocstring[s]?
+JSONSchema
+[Jj]inja2
+[Oo]verridable
+prepended
+recurses
+[Rr]enderers?
+[Ss]tdlib
+[Ss]ubquestions?
+[Tt]ui-?[Ff]orms?
+[Vv]alidators?
+TUI
+API

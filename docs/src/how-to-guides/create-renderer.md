@@ -11,7 +11,7 @@ myst:
 
 This guide walks you through implementing a custom renderer backend for TUI Forms.
 A renderer is responsible for all terminal I/O: printing prompts and reading user input.
-Everything else — question ordering, condition evaluation, default rendering, and hidden field resolution — is handled by {term}`BaseRenderer` automatically.
+Everything else—question ordering, condition evaluation, default rendering, and hidden field resolution—is handled by {term}`BaseRenderer` automatically.
 
 ## Prerequisites
 
