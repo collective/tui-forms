@@ -6,6 +6,9 @@ from typing import Protocol
 from typing import TypedDict
 
 
+_NOVALUE = object()
+
+
 class AnswerValidator(Protocol):
     """Protocol for callables that validate a question answer."""
 
@@ -38,12 +41,22 @@ class BaseQuestion:
     hidden: bool = False
 
     def _render_variable(
-        self, env: Environment, answers: dict[str, Any], value: Any
+        self, env: Environment, answers: dict[str, Any], value: Any, root_key: str = ""
     ) -> Any:
-        return template.render_variable(env, value, answers)
+        key = self.key
+        current_value = (answers.get(root_key, {}) if root_key else answers).get(
+            key, _NOVALUE
+        )
+        if current_value is _NOVALUE:
+            value = template.render_variable(env, value, answers)
+        else:
+            value = current_value
+        return value
 
-    def default_value(self, env: Environment, answers: dict[str, Any]) -> Any:
-        default_value = self._render_variable(env, answers, self.default)
+    def default_value(
+        self, env: Environment, answers: dict[str, Any], root_key: str = ""
+    ) -> Any:
+        default_value = self._render_variable(env, answers, self.default, root_key)
         return default_value
 
 
@@ -58,18 +71,23 @@ class QuestionHidden(BaseQuestion):
 class QuestionComputed(QuestionHidden):
     """A question that is not asked and will compute the value."""
 
-    def default_value(self, env: Environment, answers: dict[str, Any]) -> Any:
+    def default_value(
+        self, env: Environment, answers: dict[str, Any], root_key: str = ""
+    ) -> Any:
         val = (
             self.default["default"] if isinstance(self.default, dict) else self.default
         )
         if isinstance(val, str):
-            val = self._render_variable(env, answers, val)
+            val = self._render_variable(env, answers, val, root_key)
         elif isinstance(val, list):
-            val = [self._render_variable(env, answers, v) for v in val]
+            val = [self._render_variable(env, answers, v, root_key) for v in val]
         elif isinstance(val, dict):
-            val = {k: self._render_variable(env, answers, v) for k, v in val.items()}
+            val = {
+                k: self._render_variable(env, answers, v, root_key)
+                for k, v in val.items()
+            }
         else:
-            val = super().default_value(env, answers)
+            val = super().default_value(env, answers, root_key)
         return val
 
 
@@ -77,7 +95,9 @@ class QuestionComputed(QuestionHidden):
 class QuestionConstant(QuestionHidden):
     """A question that is not asked and will always return the raw_value."""
 
-    def default_value(self, env: Environment, answers: dict[str, Any]) -> Any:
+    def default_value(
+        self, env: Environment, answers: dict[str, Any], root_key: str = ""
+    ) -> Any:
         """Return the raw constant value without rendering."""
         return self.default
 
@@ -96,8 +116,10 @@ class QuestionBoolean(Question):
 class QuestionChoice(Question):
     """A choice question that is asked to the user."""
 
-    def default_value(self, env: Environment, answers: dict[str, Any]) -> Any:
-        default_value = super().default_value(env, answers)
+    def default_value(
+        self, env: Environment, answers: dict[str, Any], root_key: str = ""
+    ) -> Any:
+        default_value = super().default_value(env, answers, root_key)
         if not isinstance(default_value, list):
             default_value = [default_value]
         return default_value[0] if default_value else ""
@@ -107,14 +129,17 @@ class QuestionChoice(Question):
 class QuestionMultiple(Question):
     """A multiple choice question that is asked to the user."""
 
-    def default_value(self, env: Environment, answers: dict[str, Any]) -> list:
+    def default_value(
+        self, env: Environment, answers: dict[str, Any], root_key: str = ""
+    ) -> list:
         """Return the default as a list, coercing a scalar or None if needed.
 
         :param env: Jinja2 environment used to render template values.
         :param answers: Answers collected so far, used as template context.
+        :param root_key: Optional root key under which answers are nested.
         :return: The default value guaranteed to be a list.
         """
-        value = super().default_value(env, answers)
+        value = super().default_value(env, answers, root_key)
         if not isinstance(value, list):
             value = [value] if value is not None else []
         return value

@@ -50,6 +50,12 @@ Run the form interactively and return the collected answers.
 Calls the abstract methods in order as the user progresses through the form.
 After all user-facing questions are answered, resolves hidden fields automatically.
 
+If a question's key already has a value in `form.answers` (under `root_key` if set)
+before the abstract method is called, the pipeline passes that existing value as the
+`default` argument instead of evaluating the {term}`Jinja2` template.
+This lets you pre-populate specific answers so they appear as the suggested default
+when the user is prompted.
+
 **Returns:** A flat `dict` mapping each question `key` to its answer.
 When `root_key` was set on the form, all answers are nested under that key.
 
@@ -74,7 +80,7 @@ Called for fields with `type: string`, `type: integer`, or `type: number`.
 | Parameter | Type | Description |
 |---|---|---|
 | `question` | `BaseQuestion` | The question to ask. See [BaseQuestion attributes](#basequestion-attributes). |
-| `default` | `Any` | The pre-rendered default value, or `None` if no default was set. |
+| `default` | `Any` | The resolved default value: a pre-populated answer if one was already recorded for this key, otherwise the {term}`Jinja2`-rendered schema default, or `None` if no default was set. |
 | `prefix` | `str` | Progress prefix (for example, `"[1/5] "`) to display before the question title. |
 
 **Returns:** The user's answer as a `str`.
@@ -96,7 +102,7 @@ Called for fields with `type: boolean`.
 | Parameter | Type | Description |
 |---|---|---|
 | `question` | `BaseQuestion` | The question to ask. |
-| `default` | `bool \| None` | `True`, `False`, or `None` if no default was set. |
+| `default` | `bool \| None` | The resolved default: a pre-populated answer if already recorded, otherwise `True`, `False`, or `None` if no default was set. |
 | `prefix` | `str` | Progress prefix. |
 
 **Returns:** `True` or `False`.
@@ -119,7 +125,7 @@ The available options are in `question.options`.
 | Parameter | Type | Description |
 |---|---|---|
 | `question` | `BaseQuestion` | The question to ask. `question.options` holds the list of choices. |
-| `default` | `Any` | The `const` value of the pre-selected option, or `""` if none. |
+| `default` | `Any` | The resolved default: a pre-populated answer if already recorded, otherwise the `const` value of the schema-defined pre-selected option, or `""` if none. |
 | `prefix` | `str` | Progress prefix. |
 
 **Returns:** The `const` value of the selected option.
@@ -142,7 +148,7 @@ The available options are in `question.options`.
 | Parameter | Type | Description |
 |---|---|---|
 | `question` | `BaseQuestion` | The question to ask. `question.options` holds the list of choices. |
-| `default` | `list` | The list of `const` values that are pre-selected. May be empty. |
+| `default` | `list` | The resolved default: a pre-populated answer if already recorded, otherwise the list of `const` values that are pre-selected from the schema. May be empty. |
 | `prefix` | `str` | Progress prefix. |
 
 **Returns:** A `list` of `const` values for the selected options.
@@ -199,7 +205,7 @@ The following attributes are available to every renderer.
 | `type` | `str` | The field type (for example, `"string"`, `"boolean"`, `"array"`). |
 | `title` | `str` | The human-readable label to display as the prompt. |
 | `description` | `str` | Optional hint text shown below the title. May be an empty string. |
-| `default` | `Any` | The raw default from the schema (before {term}`Jinja2` rendering). Use the pre-rendered `default` argument instead. |
+| `default` | `Any` | The raw default from the schema (before {term}`Jinja2` rendering and before pre-populated answer lookup). Use the resolved `default` argument passed to the abstract method instead. |
 | `options` | `list[QuestionOption] \| None` | Available choices for `_ask_choice` and `_ask_multiple`. `None` for other types. |
 | `validator` | `AnswerValidator \| None` | A callable `(value: str) -> bool` that validates free-text input. `None` if no validation is defined. The pipeline calls `_validation_error` and re-prompts automatically when validation fails. |
 

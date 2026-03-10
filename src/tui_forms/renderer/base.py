@@ -47,7 +47,9 @@ class BaseRenderer(ABC):
             if question.hidden and self._form.is_active(question):
                 self._form.record(
                     question.key,
-                    question.default_value(self._env, self._form.answers),
+                    question.default_value(
+                        self._env, self._form.answers, self._form.root_key
+                    ),
                 )
         return dict(self._form.answers)
 
@@ -92,7 +94,9 @@ class BaseRenderer(ABC):
         prefix = self._format_prefix(
             self._form.question_index, self._form.question_total
         )
-        default = question.default_value(self._env, self._form.answers)
+        default = question.default_value(
+            self._env, self._form.answers, self._form.root_key
+        )
         func: Callable[[form.BaseQuestion, Any, str], Any] = self._ask_string
         if isinstance(question, form.QuestionBoolean):
             func = self._ask_boolean
