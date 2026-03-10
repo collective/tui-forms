@@ -74,6 +74,7 @@ formdemo = 'tui_forms.demo.__main__:main'
 stdlib = "tui_forms.renderer.stdlib:StdlibRenderer"
 cookiecutter = "tui_forms.renderer.cookiecutter:CookiecutterRenderer"
 rich  = "tui_forms.renderer.rich:RichRenderer"
+noinput = "tui_forms.renderer.noinput:NoInputRenderer"
 
 [build-system]
 requires = ["uv_build>=0.9.13,<0.10.0"]

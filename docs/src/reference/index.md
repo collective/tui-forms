@@ -27,6 +27,7 @@ base-renderer
 renderer-stdlib
 renderer-rich
 renderer-cookiecutter
+renderer-noinput
 ```
 
 ## JSONSchema
@@ -42,3 +43,4 @@ renderer-cookiecutter
 - {doc}`renderer-stdlib`
 - {doc}`renderer-rich`
 - {doc}`renderer-cookiecutter`
+- {doc}`renderer-noinput`
