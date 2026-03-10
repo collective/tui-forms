@@ -137,6 +137,6 @@ jobs:
     with:
       python-version: ${{ needs.config.outputs.python-version }}
       docs-directory: "docs"
-      working-directory: "docs"
+      working-directory: "."
       check-links: true
       check-vale: true
