@@ -108,7 +108,7 @@ linkcheck: $(VENV_FOLDER)  ## Run linkcheck
 
 .PHONY: linkcheckbroken
 linkcheckbroken: $(VENV_FOLDER)  ## Run linkcheck and show only broken links
-	@uv run sphinx-build -b linkcheck $(ALLSPHINXOPTS) $(BUILDDIR)/linkcheck | GREP_COLORS='0;31' grep -wi "broken\|redirect" --color=always | GREP_COLORS='0;31' grep -vi "https://github.com/plone/volto/issues/" --color=always && if test $$? = 0; then exit 1; fi || test $$? = 1
+	@uv run sphinx-build -b linkcheck $(ALLSPHINXOPTS) $(BUILDDIR)/linkcheck | GREP_COLORS='0;31' grep -wi "broken\|redirect" --color=always | GREP_COLORS='0;31' grep -vi "https://github.com/collective/tui-forms/issues/" --color=always && if test $$? = 0; then exit 1; fi || test $$? = 1
 	@echo
 	@echo "Link check complete; look for any errors in the above output " \
 		"or in $(BUILDDIR)/linkcheck/ ."
