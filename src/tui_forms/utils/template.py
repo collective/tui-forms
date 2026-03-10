@@ -2,7 +2,9 @@ from jinja2 import Environment
 from typing import Any
 
 
-def create_environment(config: dict[str, Any] | None) -> Environment:
+def create_environment(
+    config: dict[str, Any] | None, extensions: list[str] | None = None
+) -> Environment:
     """Create a Jinja2 Environment from an optional configuration dict.
 
     :param config: Optional config dict; the ``jinja2_environment`` key is
@@ -10,10 +12,15 @@ def create_environment(config: dict[str, Any] | None) -> Environment:
     :return: A configured Jinja2 Environment.
     """
     env_kwargs: dict[str, Any] = {}
+    extensions = extensions if extensions else []
     if config is not None:
         env_kwargs.update(config.get("jinja2_environment", {}))
     env_kwargs.pop("autoescape", None)
-    return Environment(autoescape=True, **env_kwargs)
+    try:
+        env = Environment(autoescape=True, extensions=extensions, **env_kwargs)
+    except ImportError as err:
+        raise RuntimeError(f"Unable to load extension: {err}") from err
+    return env
 
 
 def render_variable(

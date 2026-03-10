@@ -21,14 +21,20 @@ class BaseRenderer(ABC):
     _form: form.Form
     _env: Environment
 
-    def __init__(self, frm: form.Form, config: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        frm: form.Form,
+        config: dict[str, Any] | None = None,
+        extensions: list[str] | None = None,
+    ) -> None:
         """Initialise the renderer.
 
         :param frm: The form to render.
         :param config: Optional Jinja2 environment configuration.
+        :param extensions: Optional list of extensions to be loaded.
         """
         self._form = frm
-        self._env: Environment = create_environment(config)
+        self._env: Environment = create_environment(config, extensions=extensions)
 
     def render(self) -> dict[str, Any]:
         """Render the form and return the collected answers.

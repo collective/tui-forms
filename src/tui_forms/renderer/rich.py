@@ -19,13 +19,19 @@ class RichRenderer(BaseRenderer):
 
     name: str = "rich"
 
-    def __init__(self, form: Form, config: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        form: Form,
+        config: dict[str, Any] | None = None,
+        extensions: list[str] | None = None,
+    ) -> None:
         """Initialise the renderer with a shared Rich Console.
 
         :param form: The form to render.
         :param config: Optional Jinja2 environment configuration.
+        :param extensions: Optional list of extensions to be loaded.
         """
-        super().__init__(form, config)
+        super().__init__(form, config, extensions=extensions)
         self._console = Console()
 
     def _show_panel(

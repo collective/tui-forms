@@ -14,12 +14,16 @@ def create_renderer(
     renderer: str,
     schema: dict[str, Any],
     root_key: str = "",
+    jinja_config: dict[str, Any] | None = None,
+    jinja_extensions: list[str] | None = None,
 ) -> BaseRenderer:
     """Return a renderer configured with the parsed form, ready to call render().
 
     :param renderer: Name of the renderer to use (e.g. ``"stdlib"``, ``"rich"``).
     :param schema: The already-loaded JSONSchema dict describing the form.
     :param root_key: Optional key to nest all answers under in the returned dict.
+    :param jinja_config: Optional dict with configuration to be passed to Jinja2.
+    :param jinja_extensions: Optional list with extensions that need to be loaded.
     :raises ValueError: If the requested renderer name is not available.
     :raises jsonschema.ValidationError: If the schema does not conform to the
         expected form structure.
@@ -32,4 +36,4 @@ def create_renderer(
             f"Renderer {renderer!r} not found. Available renderers: {available}"
         )
     frm = jsonschema_to_form(schema, root_key=root_key)
-    return renderers[renderer](frm)
+    return renderers[renderer](frm, config=jinja_config, extensions=jinja_extensions)
