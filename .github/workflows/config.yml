@@ -29,6 +29,9 @@ on:
       version-check-python:
         description: "Check Python version"
         value: "latest"
+      version-mypy:
+        description: "MyPy version"
+        value: "latest"
 
 jobs:
   config:

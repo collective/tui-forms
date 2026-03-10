@@ -60,8 +60,7 @@ jobs:
         if: ${{ success() || failure() }}
         id: typing
         run: |
-          uv sync --all-extras
-          uv run mypy src
+          uvx mypy@${{ needs.config.outputs.version-mypy }} src
 
       - name: Report
         if: ${{ success() || failure() }}
