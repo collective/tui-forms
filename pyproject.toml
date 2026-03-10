@@ -1,0 +1,191 @@
+[project]
+name = "tui-forms"
+version = "1.0.0a0"
+description = "Schema-driven form wizards for the terminal."
+readme = "README.md"
+license = "MIT"
+authors = [
+  { name = "Érico Andrei", email = "ericof@plone.org" }
+]
+maintainers = [
+  { name = "Érico Andrei", email = "ericof@plone.org" },
+]
+requires-python = ">=3.10"
+keywords = ["tui", "terminal", "jsonschema", "form", "wizard"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+  "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+  "jinja2>=3.1.6",
+  "jsonschema>=4.26.0",
+]
+
+[project.optional-dependencies]
+rich = [
+  "rich>=13.9.0",
+]
+docs = [
+  "graphviz",
+  "linkify-it-py",
+  "myst-parser",
+  "plone-sphinx-theme>=1.4.1",
+  "sphinx-autobuild",
+  "sphinx-copybutton",
+  "sphinx-design",
+  "sphinx-examples",
+  "sphinx-notfound-page",
+  "sphinx-reredirects",
+  "sphinx-sitemap",
+  "sphinx-tippy",
+  "sphinxcontrib-httpdomain",
+  "sphinxcontrib-mermaid",
+  "sphinxcontrib-video",
+  "sphinxcontrib-youtube",
+  "sphinxext-opengraph",
+  "vale",
+]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "coverage[toml]>=7.0",
+  "towncrier",
+  "zest-releaser[recommended]",
+  "zestreleaser-towncrier",
+]
+
+[project.urls]
+Repository = "https://github.com/collective/tui-forms"
+Documentation = "https://collective.github.io/tui-forms/"
+
+[project.scripts]
+formdemo = 'tui_forms.demo.__main__:main'
+
+[project.entry-points."tui_forms.renderers"]
+stdlib = "tui_forms.renderer.stdlib:StdlibRenderer"
+cookiecutter = "tui_forms.renderer.cookiecutter:CookiecutterRenderer"
+rich  = "tui_forms.renderer.rich:RichRenderer"
+
+[build-system]
+requires = ["uv_build>=0.9.13,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+fix = true
+lint.select = [
+  # flake8-2020
+  "YTT",
+  # flake8-bandit
+  "S",
+  # flake8-bugbear
+  "B",
+  # flake8-builtins
+  "A",
+  # flake8-comprehensions
+  "C4",
+  # flake8-debugger
+  "T10",
+  # flake8-simplify
+  "SIM",
+  # mccabe
+  "C90",
+  # pycodestyle
+  "E", "W",
+  # pyflakes
+  "F",
+  # pygrep-hooks
+  "PGH",
+  # pyupgrade
+  "UP",
+  # ruff
+  "RUF",
+]
+lint.ignore = [
+  # DoNotAssignLambda
+  "E731",
+]
+
+[tool.ruff.lint.isort]
+case-sensitive = false
+no-sections = true
+force-single-line = true
+from-first = true
+lines-after-imports = 2
+lines-between-types = 1
+order-by-type = false
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501", "RUF001", "S101", "S105"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source_pkgs = ["tui_forms"]
+branch = true
+parallel = true
+omit = [
+  "src/tui_forms/locales/*.py",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.towncrier]
+package = "tui_forms"
+directory = "news/"
+filename = "CHANGES.md"
+start_string = "<!-- towncrier release notes start -->\n"
+title_format = "## {version} ({project_date})"
+template = "news/.changelog_template.jinja"
+underlines = ["", "", ""]
+issue_format = "[#{issue}](https://github.com/collective/tui-forms/issues/{issue})"
+
+[[tool.towncrier.type]]
+directory = "breaking"
+name = "Breaking changes:"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "New features:"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Bug fixes:"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "internal"
+name = "Internal:"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "documentation"
+name = "Documentation:"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "tests"
+name = "Tests"
+showcontent = true
+
+[tool.zest-releaser]
+upload-pypi = false # Build and upload with uv
+python-file-with-version = "src/tui_forms/__init__.py"

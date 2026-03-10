@@ -1,0 +1,261 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" shape-rendering="crispEdges">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=VT323&amp;family=Share+Tech+Mono&amp;display=swap');
+    </style>
+
+    <!-- Dark background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a1a"/>
+      <stop offset="100%" style="stop-color:#0d0d2b"/>
+    </linearGradient>
+
+    <!-- Purple accent gradient -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#4f46e5"/>
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Strong glow for cursor -->
+    <filter id="strongGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Scanline pattern -->
+    <pattern id="scanlines" x="0" y="0" width="1600" height="4" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="1600" height="2" fill="rgba(255,255,255,0.018)"/>
+      <rect x="0" y="2" width="1600" height="2" fill="transparent"/>
+    </pattern>
+
+    <!-- Pixel grid pattern -->
+    <pattern id="pixelGrid" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="8" height="8" fill="none" stroke="rgba(99,60,180,0.08)" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="900" fill="url(#bgGrad)"/>
+  <rect width="1600" height="900" fill="url(#pixelGrid)"/>
+  <rect width="1600" height="900" fill="url(#scanlines)"/>
+
+  <!-- Decorative side dots / pixel art accents - left side -->
+  <!-- Pixel column accent left -->
+  <rect x="40" y="100" width="8" height="8" fill="#4f46e5" opacity="0.4"/>
+  <rect x="40" y="116" width="8" height="8" fill="#4f46e5" opacity="0.25"/>
+  <rect x="40" y="132" width="8" height="8" fill="#4f46e5" opacity="0.15"/>
+  <rect x="56" y="100" width="8" height="8" fill="#7c3aed" opacity="0.3"/>
+  <rect x="56" y="116" width="8" height="8" fill="#7c3aed" opacity="0.2"/>
+
+  <rect x="40" y="760" width="8" height="8" fill="#4f46e5" opacity="0.4"/>
+  <rect x="40" y="744" width="8" height="8" fill="#4f46e5" opacity="0.25"/>
+  <rect x="56" y="760" width="8" height="8" fill="#7c3aed" opacity="0.3"/>
+
+  <!-- Decorative pixel accents right side -->
+  <rect x="1552" y="100" width="8" height="8" fill="#4f46e5" opacity="0.4"/>
+  <rect x="1552" y="116" width="8" height="8" fill="#4f46e5" opacity="0.25"/>
+  <rect x="1552" y="132" width="8" height="8" fill="#4f46e5" opacity="0.15"/>
+  <rect x="1536" y="100" width="8" height="8" fill="#7c3aed" opacity="0.3"/>
+  <rect x="1536" y="116" width="8" height="8" fill="#7c3aed" opacity="0.2"/>
+
+  <rect x="1552" y="760" width="8" height="8" fill="#4f46e5" opacity="0.4"/>
+  <rect x="1552" y="744" width="8" height="8" fill="#4f46e5" opacity="0.25"/>
+  <rect x="1536" y="760" width="8" height="8" fill="#7c3aed" opacity="0.3"/>
+
+  <!-- ====== PIXEL ART TERMINAL ICON (left of center) ====== -->
+  <!-- Terminal window frame - pixel art style (each "pixel" = 8px) -->
+  <!-- Outer frame top-left corner: x=200, y=290 -->
+
+  <!-- Define terminal window in pixel grid: 30 wide x 22 tall pixels @ 8px each = 240x176 -->
+  <!-- Top bar of terminal -->
+  <rect x="200" y="290" width="240" height="16" fill="#1e1b4b"/>
+  <!-- Terminal body -->
+  <rect x="200" y="306" width="240" height="192" fill="#13103a"/>
+  <!-- Terminal border -->
+  <rect x="200" y="290" width="240" height="208" fill="none" stroke="#4f46e5" stroke-width="2"/>
+
+  <!-- Top bar decorative dots (pixel art traffic lights) -->
+  <rect x="212" y="296" width="8" height="8" fill="#ef4444" opacity="0.8"/>
+  <rect x="228" y="296" width="8" height="8" fill="#eab308" opacity="0.8"/>
+  <rect x="244" y="296" width="8" height="8" fill="#22c55e" opacity="0.7"/>
+
+  <!-- Title bar text-like pixels -->
+  <rect x="268" y="298" width="40" height="4" fill="#6d28d9" opacity="0.6"/>
+  <rect x="268" y="298" width="40" height="4" fill="#6d28d9" opacity="0.6"/>
+
+  <!-- Form fields in terminal (pixel art representation) -->
+  <!-- Label 1 -->
+  <rect x="216" y="322" width="40" height="6" fill="#818cf8" opacity="0.7"/>
+  <!-- Input field 1 -->
+  <rect x="216" y="332" width="192" height="12" fill="#1e1b4b"/>
+  <rect x="216" y="332" width="192" height="12" fill="none" stroke="#4f46e5" stroke-width="1"/>
+  <!-- Input value pixels -->
+  <rect x="220" y="336" width="56" height="4" fill="#a5b4fc" opacity="0.8"/>
+  <!-- Cursor -->
+  <rect x="280" y="334" width="4" height="8" fill="#818cf8" filter="url(#glow)"/>
+
+  <!-- Label 2 -->
+  <rect x="216" y="354" width="56" height="6" fill="#818cf8" opacity="0.7"/>
+  <!-- Input field 2 -->
+  <rect x="216" y="364" width="192" height="12" fill="#1e1b4b"/>
+  <rect x="216" y="364" width="192" height="12" fill="none" stroke="#4f46e5" stroke-width="1"/>
+  <rect x="220" y="368" width="80" height="4" fill="#a5b4fc" opacity="0.6"/>
+
+  <!-- Select field -->
+  <rect x="216" y="386" width="32" height="6" fill="#818cf8" opacity="0.7"/>
+  <rect x="216" y="396" width="192" height="12" fill="#1e1b4b"/>
+  <rect x="216" y="396" width="192" height="12" fill="none" stroke="#4f46e5" stroke-width="1"/>
+  <rect x="220" y="400" width="32" height="4" fill="#c4b5fd" opacity="0.8"/>
+  <!-- Dropdown arrow pixels -->
+  <rect x="396" y="400" width="4" height="2" fill="#818cf8"/>
+  <rect x="398" y="402" width="2" height="2" fill="#818cf8"/>
+
+  <!-- Progress bar / wizard steps -->
+  <rect x="216" y="420" width="192" height="6" fill="#1e1b4b"/>
+  <rect x="216" y="420" width="192" height="6" fill="none" stroke="#312e81" stroke-width="1"/>
+  <rect x="216" y="420" width="96" height="6" fill="#7c3aed" opacity="0.8"/>
+
+  <!-- Step dots -->
+  <rect x="216" y="432" width="8" height="8" fill="#7c3aed"/>
+  <rect x="232" y="432" width="8" height="8" fill="#7c3aed"/>
+  <rect x="248" y="432" width="8" height="8" fill="#312e81"/>
+  <rect x="264" y="432" width="8" height="8" fill="#312e81"/>
+
+  <!-- Submit button pixel art -->
+  <rect x="296" y="452" width="80" height="16" fill="#4f46e5"/>
+  <rect x="296" y="452" width="80" height="16" fill="none" stroke="#818cf8" stroke-width="1"/>
+  <!-- Button label pixels -->
+  <rect x="308" y="458" width="56" height="4" fill="#e0e7ff" opacity="0.9"/>
+
+  <!-- ====== MAIN TITLE - PIXEL FONT TEXT ====== -->
+  <!-- Using rectangles to simulate pixel text for "TUI" -->
+  <!-- Large pixel letters at x=480, y=340 -->
+
+  <!-- T -->
+  <rect x="480" y="340" width="80" height="16" fill="#7c3aed" filter="url(#glow)"/>
+  <rect x="520" y="356" width="16" height="80" fill="#7c3aed" filter="url(#glow)"/>
+
+  <!-- U -->
+  <rect x="584" y="340" width="16" height="80" fill="#7c3aed" filter="url(#glow)"/>
+  <rect x="600" y="404" width="32" height="16" fill="#7c3aed" filter="url(#glow)"/>
+  <rect x="632" y="340" width="16" height="80" fill="#7c3aed" filter="url(#glow)"/>
+
+  <!-- I -->
+  <rect x="672" y="340" width="48" height="16" fill="#7c3aed" filter="url(#glow)"/>
+  <rect x="688" y="356" width="16" height="64" fill="#7c3aed" filter="url(#glow)"/>
+  <rect x="672" y="420" width="48" height="16" fill="#7c3aed" filter="url(#glow)"/>
+
+  <!-- Separator dot -->
+  <rect x="752" y="420" width="16" height="16" fill="#4f46e5" filter="url(#glow)"/>
+
+  <!-- F -->
+  <rect x="792" y="340" width="16" height="96" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="808" y="340" width="64" height="16" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="808" y="380" width="56" height="16" fill="#a78bfa" filter="url(#glow)"/>
+
+  <!-- O -->
+  <rect x="896" y="340" width="16" height="96" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="912" y="340" width="48" height="16" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="960" y="340" width="16" height="96" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="912" y="420" width="48" height="16" fill="#a78bfa" filter="url(#glow)"/>
+
+  <!-- R -->
+  <rect x="1000" y="340" width="16" height="96" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1016" y="340" width="48" height="16" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1064" y="356" width="16" height="32" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1016" y="388" width="48" height="12" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1048" y="400" width="16" height="36" fill="#a78bfa" filter="url(#glow)"/>
+
+  <!-- M -->
+  <rect x="1104" y="340" width="16" height="96" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1120" y="356" width="16" height="32" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1136" y="372" width="16" height="16" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1152" y="356" width="16" height="32" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1168" y="340" width="16" height="96" fill="#a78bfa" filter="url(#glow)"/>
+
+  <!-- S -->
+  <rect x="1208" y="340" width="64" height="16" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1208" y="356" width="16" height="32" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1208" y="380" width="64" height="16" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1256" y="396" width="16" height="32" fill="#a78bfa" filter="url(#glow)"/>
+  <rect x="1208" y="420" width="64" height="16" fill="#a78bfa" filter="url(#glow)"/>
+
+  <!-- Decorative pixel glow blocks under TUI -->
+  <rect x="480" y="452" width="208" height="4" fill="#4f46e5" opacity="0.4"/>
+  <rect x="480" y="456" width="160" height="2" fill="#4f46e5" opacity="0.2"/>
+
+  <!-- Accent line under all title -->
+  <rect x="480" y="468" width="800" height="3" fill="url(#accentGrad)" opacity="0.6"/>
+
+  <!-- ====== TAGLINE ====== -->
+  <!-- "Schema-driven form wizards for the terminal" as pixel art small text simulation -->
+  <!-- Using thin rectangles to mimic monospace text -->
+
+  <!-- Tagline area: smaller font-like representation -->
+  <!-- We'll write this as SVG text with pixel font feel -->
+  <text x="480" y="530"
+        font-family="'Share Tech Mono', 'Courier New', monospace"
+        font-size="28"
+        fill="#818cf8"
+        opacity="0.85"
+        letter-spacing="2">
+    Schema-driven form wizards for the terminal.
+  </text>
+
+  <!-- Small python package tag -->
+  <rect x="480" y="556" width="8" height="8" fill="#4f46e5"/>
+  <text x="496" y="564"
+        font-family="'Share Tech Mono', 'Courier New', monospace"
+        font-size="18"
+        fill="#6366f1"
+        opacity="0.6"
+        letter-spacing="1">
+    pip install tui-forms
+  </text>
+
+  <!-- ====== DECORATIVE PIXEL SCATTER (bottom right) ====== -->
+  <!-- Small pixel art scatter -->
+  <rect x="1400" y="680" width="8" height="8" fill="#4f46e5" opacity="0.5"/>
+  <rect x="1416" y="672" width="8" height="8" fill="#4f46e5" opacity="0.35"/>
+  <rect x="1424" y="688" width="8" height="8" fill="#7c3aed" opacity="0.4"/>
+  <rect x="1408" y="696" width="8" height="8" fill="#7c3aed" opacity="0.25"/>
+  <rect x="1432" y="680" width="8" height="8" fill="#6d28d9" opacity="0.3"/>
+  <rect x="1440" y="664" width="8" height="8" fill="#4f46e5" opacity="0.2"/>
+  <rect x="1448" y="688" width="8" height="8" fill="#818cf8" opacity="0.2"/>
+  <rect x="1456" y="672" width="8" height="8" fill="#4f46e5" opacity="0.3"/>
+  <rect x="1464" y="680" width="8" height="8" fill="#7c3aed" opacity="0.35"/>
+  <rect x="1472" y="664" width="8" height="8" fill="#6d28d9" opacity="0.2"/>
+  <rect x="1480" y="688" width="8" height="8" fill="#4f46e5" opacity="0.25"/>
+  <rect x="1488" y="672" width="8" height="8" fill="#818cf8" opacity="0.15"/>
+
+  <rect x="1400" y="712" width="8" height="8" fill="#7c3aed" opacity="0.2"/>
+  <rect x="1416" y="720" width="8" height="8" fill="#4f46e5" opacity="0.15"/>
+  <rect x="1432" y="712" width="8" height="8" fill="#818cf8" opacity="0.1"/>
+
+  <!-- Bottom decorative bar (pixel art) -->
+  <rect x="0" y="880" width="1600" height="20" fill="#1e1b4b" opacity="0.8"/>
+  <!-- Pixel bar decoration -->
+  <rect x="0" y="880" width="200" height="4" fill="#4f46e5" opacity="0.6"/>
+  <rect x="200" y="880" width="400" height="4" fill="#7c3aed" opacity="0.5"/>
+  <rect x="600" y="880" width="200" height="4" fill="#6d28d9" opacity="0.4"/>
+  <rect x="800" y="880" width="800" height="4" fill="#312e81" opacity="0.3"/>
+
+  <!-- CRT corner vignette effect -->
+  <radialGradient id="vignette" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+    <stop offset="60%" style="stop-color:transparent"/>
+    <stop offset="100%" style="stop-color:rgba(0,0,0,0.55)"/>
+  </radialGradient>
+  <rect width="1600" height="900" fill="url(#vignette)"/>
+</svg>

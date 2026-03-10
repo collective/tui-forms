@@ -1,0 +1,69 @@
+name: 'Compute Config variables'
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        type: string
+        default: "3.12"
+    outputs:
+      backend:
+        description: "Flag reporting if we should run the code jobs"
+        value: ${{ jobs.config.outputs.backend }}
+      docs:
+        description: "Flag reporting if we should run the docs jobs"
+        value: ${{ jobs.config.outputs.docs }}
+      base-tag:
+        description: "Base tag to be used when creating container images"
+        value: ${{ jobs.config.outputs.base-tag }}
+      python-version:
+        description: "Python version to be used"
+        value: ${{ inputs.python-version }}
+      version-pyroma:
+        description: "Pyroma version"
+        value: "latest"
+      version-ruff:
+        description: "Ruff version"
+        value: "latest"
+      version-check-python:
+        description: "Check Python version"
+        value: "latest"
+
+jobs:
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      docs: ${{ steps.filter.outputs.docs }}
+      base-tag: ${{ steps.vars.outputs.BASE_TAG }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Compute several vars needed for the CI
+        id: vars
+        run: |
+          echo "base-tag=sha-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - uses: dorny/paths-filter@v3.0.2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - '**'
+              - '.github/workflows/config.yml'
+              - '.github/workflows/main.yml'
+            docs:
+              - 'docs/**'
+              - '.vale'
+              - '.github/workflows/docs.yml'
+
+      - name: Test vars
+        run: |
+          echo "base-tag: ${{ steps.vars.outputs.base-tag }}"
+          echo 'event-name: ${{ github.event_name }}'
+          echo "ref-name: ${{ github.ref_name }}"
+          echo 'Paths - code: ${{ steps.filter.outputs.backend }}'
+          echo 'Paths - docs: ${{ steps.filter.outputs.docs }}'

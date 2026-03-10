@@ -1,0 +1,24 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Cache and log files
+*.log
+__pycache__/
+.ruff_cache
+.mypy_cache
+
+# Test / coverage reports
+.coverage
+.coverage.*
+.pytest_cache/
+
+# Agents
+.claude/settings.local.json
+
+# Virtual environments
+.venv

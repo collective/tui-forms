@@ -1,0 +1,361 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://collective.github.io/tui-forms/schema.json",
+  "title": "TUI Forms form schema",
+  "description": "Validates a JSONSchema document that tui-forms can parse into an interactive terminal form wizard.",
+  "type": "object",
+  "required": ["properties"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the meta-schema this document conforms to."
+    },
+    "$id": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical URI of this schema."
+    },
+    "title": {
+      "type": "string",
+      "description": "Form title shown to the user at the start of the wizard."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description shown below the title."
+    },
+    "version": {
+      "type": "string",
+      "description": "Optional schema version identifier."
+    },
+    "type": {
+      "type": "string",
+      "const": "object",
+      "description": "Root type. Always 'object' for a tui-forms schema."
+    },
+    "required": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "Keys that are expected to be present. Informational only; not enforced by tui-forms."
+    },
+    "properties": {
+      "type": "object",
+      "description": "The form questions. Each key becomes a question key in the returned answers dict.",
+      "additionalProperties": { "$ref": "#/$defs/property" }
+    },
+    "$defs": {
+      "type": "object",
+      "description": "Reusable schema fragments that can be referenced with $ref.",
+      "additionalProperties": { "$ref": "#/$defs/refTarget" }
+    },
+    "definitions": {
+      "type": "object",
+      "description": "Alias for $defs, supported for compatibility. Reusable schema fragments.",
+      "additionalProperties": { "$ref": "#/$defs/refTarget" }
+    },
+    "patternProperties": {
+      "type": "object",
+      "description": "Pattern-based property schemas. Recognised by tui-forms but not actively parsed."
+    },
+    "allOf": {
+      "$ref": "#/$defs/allOfArray",
+      "description": "Top-level conditional blocks that add questions based on previous answers."
+    }
+  },
+  "$defs": {
+    "property": {
+      "description": "A single form field definition. The question class is determined by 'format' first, then 'type' and the presence of options.",
+      "type": "object",
+      "properties": {
+        "$ref": {
+          "type": "string",
+          "description": "JSON Pointer to a definition in $defs or definitions (e.g. '#/$defs/MyDef'). Inline keys override the referenced schema."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "array", "object"],
+          "description": "JSONSchema type. Defaults to 'string' when omitted. Determines the question class together with 'format' and the presence of options.",
+          "default": "string"
+        },
+        "format": {
+          "type": "string",
+          "description": "Controls question class and input validation. 'computed' and 'constant' mark the field as hidden. Other values enable format-specific validators.",
+          "anyOf": [
+            {
+              "enum": ["computed", "constant"],
+              "description": "'computed': evaluates 'default' as a Jinja2 template after all user questions. 'constant': returns 'default' as-is without template rendering."
+            },
+            {
+              "enum": ["email", "idn-email", "date", "date-time", "data-url"],
+              "description": "Enables built-in input validation. The renderer re-prompts on invalid input."
+            },
+            {
+              "type": "string",
+              "description": "Any other format value is accepted without validation."
+            }
+          ]
+        },
+        "title": {
+          "type": "string",
+          "description": "Label shown to the user as the question prompt. Defaults to the property key when omitted."
+        },
+        "description": {
+          "type": "string",
+          "description": "Help text shown below the question title."
+        },
+        "default": {
+          "description": "Default value. Pre-filled for user-facing questions; used as the result for hidden fields. May be a Jinja2 template string when 'format' is 'computed'."
+        },
+        "oneOf": {
+          "type": "array",
+          "description": "Options for a single-choice question. Each entry must have 'const' and 'title'. Produces a QuestionChoice.",
+          "items": { "$ref": "#/$defs/option" },
+          "minItems": 1
+        },
+        "anyOf": {
+          "type": "array",
+          "description": "Options for a single-choice question using anyOf style. Each entry must have 'enum' and 'title'. Produces a QuestionChoice.",
+          "items": { "$ref": "#/$defs/anyOfOption" },
+          "minItems": 1
+        },
+        "items": {
+          "description": "Schema for array items. Use 'oneOf' or 'anyOf' on items to produce a multiple-choice question (QuestionMultiple).",
+          "oneOf": [
+            { "$ref": "#/$defs/itemsSchema" },
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/itemsSchema" },
+              "description": "Tuple validation: fixed-length array with per-position schemas. Accepted by tui-forms but not actively parsed for question options."
+            }
+          ]
+        },
+        "properties": {
+          "type": "object",
+          "description": "Sub-questions for 'type: object' fields. The object itself is not asked; its properties are unpacked as individual questions.",
+          "additionalProperties": { "$ref": "#/$defs/property" }
+        },
+        "allOf": {
+          "$ref": "#/$defs/allOfArray",
+          "description": "Conditional sub-question blocks for 'type: object' fields."
+        },
+        "required": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true,
+          "description": "Required sub-keys. Informational only; not enforced by tui-forms."
+        },
+        "minItems": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum number of array items. Documented but not enforced by tui-forms."
+        },
+        "maxItems": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum number of array items. Documented but not enforced by tui-forms."
+        },
+        "uniqueItems": {
+          "type": "boolean",
+          "description": "Whether array items must be unique. Documented but not enforced by tui-forms."
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum string length. Documented but not enforced by tui-forms."
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum string length. Documented but not enforced by tui-forms."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern for string validation. Documented but not enforced by tui-forms."
+        },
+        "validator": {
+          "type": "string",
+          "description": "Dotted Python import path of a custom validator callable (e.g. 'mypackage.validators.is_valid'). The callable must accept a str and return bool. When present, overrides any format-based built-in validator. Ignored for hidden fields (format: constant or computed). An empty string is treated as no validator."
+        }
+      }
+    },
+    "refTarget": {
+      "description": "A reusable schema fragment stored in $defs or definitions. May define option lists, property groups, or full property schemas.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "array", "object"]
+        },
+        "format": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "default": {},
+        "oneOf": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/option" }
+        },
+        "anyOf": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/anyOfOption" }
+        },
+        "enum": {
+          "type": "array",
+          "description": "List of allowed values. Used in anyOf option-extraction patterns."
+        },
+        "const": {
+          "description": "A fixed value. Used in oneOf option-extraction patterns."
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/property" }
+        },
+        "allOf": { "$ref": "#/$defs/allOfArray" },
+        "items": { "$ref": "#/$defs/itemsSchema" },
+        "required": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "description": "A single choice option in a oneOf list.",
+      "required": ["const", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "const": {
+          "description": "The value stored in the answers dict when this option is selected."
+        },
+        "title": {
+          "type": "string",
+          "description": "The label displayed to the user."
+        }
+      }
+    },
+    "anyOfOption": {
+      "type": "object",
+      "description": "An option group in an anyOf list. Each value in 'enum' becomes a selectable option.",
+      "required": ["enum", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Optional JSONSchema type annotation for the enum values."
+        },
+        "enum": {
+          "type": "array",
+          "description": "One or more values for this option group.",
+          "minItems": 1
+        },
+        "title": {
+          "type": "string",
+          "description": "The label displayed to the user for all values in this group."
+        }
+      }
+    },
+    "itemsSchema": {
+      "type": "object",
+      "description": "Schema for array items. Add oneOf or anyOf to produce a multiple-choice question.",
+      "properties": {
+        "$ref": {
+          "type": "string",
+          "description": "Reference to a definition in $defs or definitions."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "array", "object"]
+        },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "oneOf": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/option" },
+          "minItems": 1,
+          "description": "Options for a multiple-choice question (QuestionMultiple)."
+        },
+        "anyOf": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/anyOfOption" },
+          "minItems": 1,
+          "description": "Options for a multiple-choice question using anyOf style."
+        },
+        "enum": {
+          "type": "array",
+          "description": "Allowed values for array items."
+        }
+      }
+    },
+    "allOfArray": {
+      "type": "array",
+      "description": "A list of conditional blocks. Each block shows additional questions when its 'if' condition is satisfied.",
+      "items": { "$ref": "#/$defs/conditionalBlock" },
+      "minItems": 1
+    },
+    "conditionalBlock": {
+      "type": "object",
+      "description": "An allOf entry. When it contains 'if' and 'then', tui-forms uses it as a conditional block that adds questions when the 'if' condition matches the current answers. Items without 'if'/'then' are valid JSON Schema constraints and are silently skipped by tui-forms.",
+      "properties": {
+        "if": {
+          "type": "object",
+          "description": "The condition. Must follow the pattern: {properties: {questionKey: {const: triggerValue}}}.",
+          "required": ["properties"],
+          "additionalProperties": false,
+          "properties": {
+            "properties": {
+              "type": "object",
+              "description": "Map of question keys to their expected trigger values.",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": "object",
+                "required": ["const"],
+                "additionalProperties": false,
+                "properties": {
+                  "const": {
+                    "description": "The answer value that activates this conditional block."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "then": {
+          "description": "Questions to add when the condition is satisfied. Either a $ref or an object with 'properties'.",
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "A direct $ref to a definition that contains the conditional properties.",
+              "required": ["$ref"],
+              "additionalProperties": false,
+              "properties": {
+                "$ref": { "type": "string" }
+              }
+            },
+            {
+              "type": "object",
+              "description": "An inline set of conditional questions, with an optional 'required' list.",
+              "required": ["properties"],
+              "additionalProperties": false,
+              "properties": {
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/$defs/property" }
+                },
+                "required": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Required keys within the conditional block. Informational only."
+                }
+              }
+            }
+          ]
+        },
+        "required": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Standard JSON Schema 'required' constraint. Accepted but not enforced by tui-forms."
+        }
+      }
+    }
+  }
+}
