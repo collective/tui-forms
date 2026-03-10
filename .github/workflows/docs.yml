@@ -36,11 +36,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup uv
-        uses: plone/meta/.github/actions/setup_uv@2.x
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ inputs.python-version }}
-          working-directory: ${{ inputs.working-directory }}
+          cache-python: true
+          enable-cache: true
+          cache-suffix: "optional-suffix"
+          cache-dependency-glob: |
+            **/uv.lock
 
       - name: Install Dependencies
         shell: bash
