@@ -119,6 +119,10 @@ docs-livehtml: $(VENV_FOLDER) ## Build documentation and serve it
 docs-vale: $(VENV_FOLDER) ## Run vale on the documentation
 	@make -C ./docs vale
 
+.PHONY: docs-linkcheckbroken
+docs-linkcheckbroken: $(VENV_FOLDER) ## Run checks for broken links
+	@make -C ./docs linkcheckbroken
+
 .PHONY: docs-test
 docs-test: $(VENV_FOLDER) ## Run tests on the documentation
 	@make -C ./docs test

@@ -59,13 +59,13 @@ jobs:
         if: ${{ inputs.check-links }}
         shell: bash
         run: |
-          make linkcheckbroken
+          make docs-linkcheckbroken
 
       - name: Run vale checks
         if: ${{ inputs.check-vale }}
         shell: bash
         run: |
-          make vale VALEOPTS="--minAlertLevel='warning'"
+          make docs-vale VALEOPTS="--minAlertLevel='warning'"
 
       - name: Upload static files as artifact
         id: deployment
