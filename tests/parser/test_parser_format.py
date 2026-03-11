@@ -301,3 +301,68 @@ def test_invalid_validator_key_raises_value_error():
     """A 'validator' key with a bad dotted path should raise ValueError at parse time."""
     with pytest.raises(ValueError, match="dotted path"):
         _parse_one("x", {"type": "string", "validator": "nodot"})
+
+
+# ---------------------------------------------------------------------------
+# options array format
+# ---------------------------------------------------------------------------
+
+
+def test_options_list_produces_choice_question():
+    """A property with an 'options' list-of-pairs is parsed as QuestionChoice."""
+    q = _parse_one(
+        "lang",
+        {
+            "type": "string",
+            "default": "en",
+            "options": [["en", "English"], ["de", "Deutsch"]],
+        },
+    )
+    assert isinstance(q, form.QuestionChoice)
+    assert q.options == [
+        {"const": "en", "title": "English"},
+        {"const": "de", "title": "Deutsch"},
+    ]
+
+
+def test_options_list_default_is_respected():
+    """The 'default' value on an options-list field is passed through unchanged."""
+    q = _parse_one(
+        "env",
+        {
+            "type": "string",
+            "default": "prod",
+            "options": [["dev", "Dev"], ["prod", "Prod"]],
+        },
+    )
+    assert q.default == "prod"
+
+
+def test_options_list_with_tuple_items():
+    """Tuple items in the 'options' list are also accepted."""
+    q = _parse_one(
+        "x",
+        {
+            "type": "string",
+            "default": "a",
+            "options": [("a", "Alpha"), ("b", "Beta")],
+        },
+    )
+    assert q.options == [
+        {"const": "a", "title": "Alpha"},
+        {"const": "b", "title": "Beta"},
+    ]
+
+
+def test_options_list_ignored_when_oneOf_present():
+    """oneOf takes priority over the 'options' key when both are present."""
+    q = _parse_one(
+        "x",
+        {
+            "type": "string",
+            "default": "a",
+            "oneOf": [{"const": "a", "title": "Alpha"}],
+            "options": [["b", "Beta"]],
+        },
+    )
+    assert q.options == [{"const": "a", "title": "Alpha"}]

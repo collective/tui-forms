@@ -72,7 +72,7 @@ def _resolve_ref(schema: dict[str, Any], ref: str) -> dict[str, Any]:
 def _extract_options(
     prop_schema: dict[str, Any], schema: dict[str, Any]
 ) -> list[form.QuestionOption]:
-    """Extract QuestionOptions from oneOf or anyOf entries."""
+    """Extract QuestionOptions from oneOf, anyOf, or options entries."""
     options: list[form.QuestionOption] = []
     if one_of := prop_schema.get("oneOf"):
         options = [
@@ -85,6 +85,10 @@ def _extract_options(
             if "enum" in item and "title" in item:
                 for val in item["enum"]:
                     options.append({"const": val, "title": item["title"]})
+    elif raw_options := prop_schema.get("options"):
+        for item in raw_options:
+            if isinstance(item, (list, tuple)) and len(item) >= 2:
+                options.append({"const": item[0], "title": item[1]})
     elif (items := prop_schema.get("items")) and isinstance(items, dict):
         options = _extract_options(items, schema)
     return options

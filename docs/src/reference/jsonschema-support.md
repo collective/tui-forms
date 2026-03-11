@@ -20,7 +20,7 @@ The table below summarises how a property's `type` and keywords determine the re
 |---|---|---|
 | `type: string` / `integer` / `number` | `Question` | Yes |
 | `type: boolean` | `QuestionBoolean` | Yes |
-| Any scalar type + `oneOf` or `anyOf` | `QuestionChoice` | Yes |
+| Any scalar type + `oneOf`, `anyOf`, or `options` | `QuestionChoice` | Yes |
 | `type: array` + `oneOf` or `anyOf` on `items` | `QuestionMultiple` | Yes |
 | `type: object` | *(subquestions)* | No—children are asked |
 | Any type + `format: constant` | `QuestionConstant` | No |
@@ -71,8 +71,11 @@ The renderer shows a yes/no prompt.
 
 ## Single-choice fields
 
-A property with `oneOf` or `anyOf` produces a `QuestionChoice`.
-Each entry in `oneOf` must have a `const` (the stored value) and a `title` (the label shown to the user).
+A property with `oneOf`, `anyOf`, or `options` produces a `QuestionChoice`.
+
+### Using `oneOf`
+
+Each entry must have a `const` (the stored value) and a `title` (the label shown to the user).
 
 ```json
 {
@@ -91,8 +94,33 @@ Each entry in `oneOf` must have a `const` (the stored value) and a `title` (the 
 }
 ```
 
-`anyOf` is also supported.
+### Using `anyOf`
+
 Each entry must have an `enum` array and a `title`; TUI Forms creates one option per `enum` value.
+
+### Using `options`
+
+The `options` key accepts a list of `[value, label]` pairs.
+This is a compact alternative to `oneOf` that avoids the verbosity of full JSONSchema option objects.
+
+```json
+{
+  "properties": {
+    "language": {
+      "type": "string",
+      "title": "Language",
+      "default": "en",
+      "options": [
+        ["en", "English"],
+        ["de", "Deutsch"],
+        ["pt-br", "Português (Brasil)"]
+      ]
+    }
+  }
+}
+```
+
+When `oneOf` or `anyOf` is also present, they take priority and `options` is ignored.
 
 ---
 
