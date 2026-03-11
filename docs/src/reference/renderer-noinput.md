@@ -7,7 +7,7 @@ myst:
     "keywords": "tui-forms, reference, noinput, renderer, replay, pre-populated, non-interactive"
 ---
 
-# noinput renderer
+# `noinput` renderer
 
 The `noinput` renderer processes a form without prompting the user.
 Every question is resolved using its pre-populated answer (when provided) or the
