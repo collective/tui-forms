@@ -22,6 +22,7 @@ https://diataxis.fr/reference/
 :maxdepth: 1
 :hidden: true
 
+public-api
 jsonschema-support
 base-renderer
 renderer-stdlib
@@ -29,6 +30,10 @@ renderer-rich
 renderer-cookiecutter
 renderer-noinput
 ```
+
+## Public API
+
+- {doc}`public-api`
 
 ## JSONSchema
 
