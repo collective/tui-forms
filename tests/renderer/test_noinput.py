@@ -268,3 +268,19 @@ def test_render_with_no_args_uses_schema_defaults():
     )
     result = NoInputRenderer(frm).render()
     assert result["name"] == "default-name"
+
+
+# ---------------------------------------------------------------------------
+# _user_answers
+# ---------------------------------------------------------------------------
+
+
+def test_noinput_user_answers_is_empty_after_render():
+    """NoInputRenderer never interacts with the user, so _user_answers stays empty."""
+    frm = _form(
+        form.Question(
+            key="name", type="string", title="Name", description="", default="Alice"
+        )
+    )
+    NoInputRenderer(frm).render()
+    assert frm._user_answers == set()

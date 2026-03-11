@@ -430,3 +430,35 @@ def test_no_validator_accepts_any_answer(make_form, render):
         )
     )
     assert render(frm, ["anything"])["x"] == "anything"
+
+
+# ---------------------------------------------------------------------------
+# _user_answers
+# ---------------------------------------------------------------------------
+
+
+def test_interactive_renderer_populates_user_answers(make_form):
+    """Interactive renderers mark every user-facing question key as user-provided."""
+    frm = make_form(
+        form.Question(key="a", type="string", title="A", description="", default=""),
+        form.Question(key="b", type="string", title="B", description="", default=""),
+    )
+    with patch("builtins.input", side_effect=["x", "y"]), patch("builtins.print"):
+        StdlibRenderer(frm).render()
+    assert frm._user_answers == {"a", "b"}
+
+
+def test_hidden_field_not_in_user_answers(make_form):
+    """Hidden computed fields are never added to _user_answers."""
+    frm = make_form(
+        form.Question(
+            key="name", type="string", title="Name", description="", default=""
+        ),
+        form.QuestionComputed(
+            key="slug", type="string", title="", description="", default="{{ name }}"
+        ),
+    )
+    with patch("builtins.input", side_effect=["alice"]), patch("builtins.print"):
+        StdlibRenderer(frm).render()
+    assert "name" in frm._user_answers
+    assert "slug" not in frm._user_answers

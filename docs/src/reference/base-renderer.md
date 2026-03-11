@@ -19,10 +19,16 @@ The class provides the complete rendering pipeline—question ordering, conditio
 ```python
 class BaseRenderer(ABC):
     name: str = "base"
+    _user_provided: bool = True
 ```
 
 Set `name` to a unique string identifier on your subclass.
 This value is used when the renderer is discovered via `available_renderers()`.
+
+Set `_user_provided = False` on a subclass to prevent answers recorded by
+`_ask_questions` from being added to `form._user_answers`.
+Use this for non-interactive renderers where no real user input takes place.
+{doc}`renderer-noinput` sets this to `False`.
 
 ## Constructor
 
@@ -64,6 +70,30 @@ the suggested default when the user is prompted.
 
 **Returns:** A flat `dict` mapping each question `key` to its answer.
 When `root_key` was set on the form, all answers are nested under that key.
+
+### Inspecting user-provided answers
+
+After `render()` returns, `form.user_answers` contains only the answers
+that were actively provided by the user—either by accepting the suggested
+default or by entering a new value.
+Hidden computed fields and answers recorded by non-interactive renderers
+(such as {doc}`renderer-noinput`) are excluded.
+
+```python
+from tui_forms import create_form, get_renderer
+
+frm = create_form(schema)
+renderer = get_renderer("stdlib")(frm)
+answers = renderer.render()
+
+# answers includes all fields (user-provided and computed)
+# frm.user_answers includes only what the user actively answered
+print(frm.user_answers)
+```
+
+`form.user_answers` returns a `dict[str, Any]`.
+When `root_key` was set on the form, the `root_key` nesting is resolved:
+the returned dict uses plain field keys, not nested keys.
 
 ## Abstract methods
 

@@ -19,6 +19,16 @@ class Form:
     answers: dict[str, Any] = field(default_factory=dict)
     root_key: str = ""
     _question_index: int = field(default=0, init=False, repr=False)
+    _user_answers: set[str] = field(default_factory=set, init=False, repr=False)
+
+    @property
+    def user_answers(self) -> dict[str, Any]:
+        """Return question data answered by the user."""
+        answers = self.answers
+        if root_key := self.root_key:
+            answers = answers[root_key]
+        user_answers = {k: answers[k] for k in self._user_answers}
+        return user_answers
 
     @property
     def question_index(self) -> int:
@@ -45,17 +55,21 @@ class Form:
     def start(self) -> None:
         """Reset the form to its initial state for a fresh rendering pass."""
         self.answers.clear()
+        self._user_answers.clear()
         self._question_index = 0
 
     def advance(self) -> None:
         """Advance the question index by one."""
         self._question_index += 1
 
-    def record(self, key: str, value: Any) -> None:
+    def record(self, key: str, value: Any, user_provided: bool = False) -> None:
         """Record an answer for the given question key.
 
         :param key: The question key.
         :param value: The answer value.
+        :param user_provided: When True, the answer came from a user interaction
+            (either accepting the suggested default or entering a new value) and
+            the key is added to ``_user_answers``.
         """
         answers = self.answers
         if self.root_key:
@@ -63,6 +77,8 @@ class Form:
                 answers[self.root_key] = {}
             answers = answers[self.root_key]
         answers[key] = value
+        if user_provided:
+            self._user_answers.add(key)
 
     def iter_all(self) -> Iterator[BaseQuestion]:
         """Yield every question and its subquestions depth-first.

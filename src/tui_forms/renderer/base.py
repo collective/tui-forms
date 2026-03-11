@@ -18,6 +18,7 @@ class BaseRenderer(ABC):
     """
 
     name: str = "base"
+    _user_provided: bool = True
     _form: form.Form
     _env: Environment
 
@@ -85,7 +86,11 @@ class BaseRenderer(ABC):
                 self._ask_questions(question.subquestions)
             else:
                 self._form.advance()
-                self._form.record(question.key, self._dispatch(question))
+                self._form.record(
+                    question.key,
+                    self._dispatch(question),
+                    user_provided=self._user_provided,
+                )
 
     def _dispatch(self, question: form.BaseQuestion) -> Any:
         """Dispatch to the appropriate ask method based on question type.

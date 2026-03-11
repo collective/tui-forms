@@ -15,6 +15,7 @@ class NoInputRenderer(BaseRenderer):
     """
 
     name: str = "noinput"
+    _user_provided: bool = False
 
     def render(self, initial_answers: dict[str, Any] | None = None) -> dict[str, Any]:
         """Process the form using pre-populated answers and return the result.

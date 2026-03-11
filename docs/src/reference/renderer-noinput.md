@@ -91,3 +91,14 @@ Validator functions attached to questions are invoked as normal.
 When an answer fails validation the `_validation_error` hook is a no-op—no output
 is produced and the failing answer is accepted as-is.
 If strict validation is required, validate `initial_answers` before passing them to `render()`.
+
+---
+
+## `form.user_answers` after `noinput`
+
+`noinput` sets `_user_provided = False`, so no answers are recorded in
+`form._user_answers` during a `noinput` pass.
+After `render()`, `form.user_answers` is always an empty dict.
+
+This means you can safely use `noinput` to re-evaluate computed defaults
+without polluting the `user_answers` set from a previous interactive session.

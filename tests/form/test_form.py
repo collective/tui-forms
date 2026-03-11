@@ -119,6 +119,25 @@ def test_record_overwrites_existing_answer(simple_form):
     assert simple_form.answers["a"] == "second"
 
 
+def test_record_user_provided_adds_to_user_answers(simple_form):
+    """record() with user_provided=True should add the key to _user_answers."""
+    simple_form.record("a", "hello", user_provided=True)
+    assert "a" in simple_form._user_answers
+
+
+def test_record_not_user_provided_does_not_add_to_user_answers(simple_form):
+    """record() with user_provided=False (default) should not touch _user_answers."""
+    simple_form.record("a", "hello")
+    assert "a" not in simple_form._user_answers
+
+
+def test_start_clears_user_answers(simple_form):
+    """start() should clear _user_answers alongside answers."""
+    simple_form.record("a", "hello", user_provided=True)
+    simple_form.start()
+    assert simple_form._user_answers == set()
+
+
 # ---------------------------------------------------------------------------
 # question_total / count_visible
 # ---------------------------------------------------------------------------
