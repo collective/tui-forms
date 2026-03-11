@@ -289,7 +289,10 @@ The constructor accepts an optional `config: dict` forwarded to `create_environm
    - Run `make lint-mypy` after all changes, fix all reported issues
 
 7. Documentation
-   - After any documentation change, run `make docs-test` and fix all reported errors.
+   - Run `make docs-test` and fix all reported errors after **any** of the following:
+     - Editing any file under `./docs/`
+     - Editing `.vale.ini`
+     - Adding or renaming a documentation page
 
 ## Notes on Optional Dependencies
 

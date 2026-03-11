@@ -159,6 +159,8 @@ A documentation task is complete only when:
 
 "The page renders" is not done. "Vale passes" is not done on its own. All six must be true.
 
+**REQUIRED: run `make docs-test` after every edit to any file under `./docs/` or to `.vale.ini`, and fix all reported errors before considering the task complete.**
+
 ---
 
 ## 10. What not to do
