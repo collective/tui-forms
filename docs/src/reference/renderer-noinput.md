@@ -28,19 +28,8 @@ answers = renderer.render()
 
 ## `render` method
 
-```python
-def render(self, initial_answers: dict | None = None) -> dict
-```
-
-The `noinput` renderer extends the standard `render()` signature with an optional
-`initial_answers` parameter.
-
-| Parameter | Type | Description |
-|---|---|---|
-| `initial_answers` | `dict \| None` | A dict of pre-populated answers, structured exactly as returned by a previous `render()` call. Root-key nesting is included when applicable. When omitted or `None`, schema defaults are used for all questions. |
-
-**Returns:** A flat `dict` mapping each question `key` to its answer.
-When `root_key` was set on the form, all answers are nested under that key.
+`noinput` inherits `render(initial_answers=None)` from {doc}`base-renderer` without changes.
+See {ref}`the BaseRenderer render docs <base-renderer:render>` for the full parameter reference.
 
 ### Typical use case
 

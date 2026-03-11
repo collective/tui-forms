@@ -36,12 +36,17 @@ class BaseRenderer(ABC):
         self._form = frm
         self._env: Environment = create_environment(config, extensions=extensions)
 
-    def render(self) -> dict[str, Any]:
+    def render(self, initial_answers: dict[str, Any] | None = None) -> dict[str, Any]:
         """Render the form and return the collected answers.
 
+        :param initial_answers: Optional pre-populated answers that take priority
+            over schema defaults. Pass the dict exactly as returned by a previous
+            ``render()`` call (root_key nesting included, when applicable).
         :return: A flat dict mapping each question key to its answer.
         """
         self._form.start()
+        if initial_answers:
+            self._form.answers.update(initial_answers)
         self._ask_questions(self._form.questions)
         for question in self._form.iter_all():
             if question.hidden and self._form.is_active(question):

@@ -16,33 +16,17 @@ class NoInputRenderer(BaseRenderer):
 
     name: str = "noinput"
 
-    def render(  # type: ignore[override]
+    def render(
         self, initial_answers: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Process the form using pre-populated answers and return the result.
 
-        Seeds the form with ``initial_answers``, then processes every
-        question and hidden field without prompting the user.
-
         :param initial_answers: Answers from a previous render() call.
             These are seeded into the form before questions are processed,
             so they take priority over schema defaults.
-            Pass the dict exactly as returned by a previous render() call
-            (root_key nesting included, when applicable).
         :return: A flat dict mapping each question key to its answer.
         """
-        self._form.start()
-        self._form.answers.update(initial_answers or {})
-        self._ask_questions(self._form.questions)
-        for question in self._form.iter_all():
-            if question.hidden and self._form.is_active(question):
-                self._form.record(
-                    question.key,
-                    question.default_value(
-                        self._env, self._form.answers, self._form.root_key
-                    ),
-                )
-        return dict(self._form.answers)
+        return super().render(initial_answers)
 
     def _validation_error(self, question: form.BaseQuestion) -> None:
         """No-op: there is no user to display a validation error to.

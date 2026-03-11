@@ -39,22 +39,28 @@ You do not normally call this directly—use {func}`tui_forms.create_renderer` i
 
 ## Public method
 
+(base-renderer:render)=
 ### `render`
 
 ```python
-def render(self) -> dict[str, Any]
+def render(self, initial_answers: dict[str, Any] | None = None) -> dict[str, Any]
 ```
 
-Run the form interactively and return the collected answers.
+Run the form and return the collected answers.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `initial_answers` | `dict \| None` | Optional pre-populated answers that take priority over schema defaults. Pass the dict exactly as returned by a previous `render()` call (`root_key` nesting included, when applicable). When `None`, schema defaults are used for all questions. |
 
 Calls the abstract methods in order as the user progresses through the form.
 After all user-facing questions are answered, resolves hidden fields automatically.
 
-If a question's key already has a value in `form.answers` (under `root_key` if set)
-before the abstract method is called, the pipeline passes that existing value as the
-`default` argument instead of evaluating the {term}`Jinja2` template.
-This lets you pre-populate specific answers so they appear as the suggested default
-when the user is prompted.
+When `initial_answers` is provided, it is seeded into `form.answers` before questions
+are processed. If a question's key already has a value in `form.answers` (under
+`root_key` if set) before the abstract method is called, the pipeline passes that
+existing value as the `default` argument instead of evaluating the {term}`Jinja2`
+template. For interactive renderers, this means the pre-populated value appears as
+the suggested default when the user is prompted.
 
 **Returns:** A flat `dict` mapping each question `key` to its answer.
 When `root_key` was set on the form, all answers are nested under that key.
