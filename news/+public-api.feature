@@ -1,1 +1,0 @@
-Added `create_form` and `get_renderer` to the public API. `create_form` parses a JSON Schema into a `Form` instance independently of any renderer. `get_renderer` returns a renderer class by name without instantiating it. @ericof

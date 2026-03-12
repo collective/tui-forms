@@ -1,1 +1,0 @@
-Added `Form.user_answers` property. After `render()`, `form.user_answers` returns a dict containing only the answers that were actively provided by the user (either by accepting the suggested default or by entering a new value). Hidden computed fields and `NoInputRenderer` answers are excluded. @ericof
