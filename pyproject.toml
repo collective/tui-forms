@@ -65,6 +65,7 @@ dev = [
 
 [project.urls]
 Repository = "https://github.com/collective/tui-forms"
+Issues = "https://github.com/collective/tui-forms/issues"
 Documentation = "https://collective.github.io/tui-forms/"
 
 [project.scripts]
