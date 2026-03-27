@@ -1959,7 +1959,7 @@ wheels = [
 
 [[package]]
 name = "tui-forms"
-version = "1.0.0a1"
+version = "1.0.0a2.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },
