@@ -535,6 +535,52 @@ def test_interactive_renderer_populates_user_answers(make_form):
     assert frm._user_answers == {"a", "b"}
 
 
+# ---------------------------------------------------------------------------
+# required field tests
+# ---------------------------------------------------------------------------
+
+
+def test_required_field_retries_on_empty(make_form, render):
+    """A required string field should re-prompt when the user submits empty input."""
+    frm = make_form(
+        form.Question(
+            key="x", type="string", title="X", description="", default="", required=True
+        )
+    )
+    assert render(frm, ["", "hello"])["x"] == "hello"
+
+
+def test_required_field_prints_error_on_empty(make_form):
+    """A required string field should print an error message on empty input."""
+    frm = make_form(
+        form.Question(
+            key="x", type="string", title="X", description="", default="", required=True
+        )
+    )
+    with (
+        patch("builtins.input", side_effect=["", "hello"]),
+        patch("builtins.print") as mock_print,
+    ):
+        StdlibRenderer(frm).render()
+    printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
+    assert "required" in printed
+
+
+def test_non_required_field_accepts_empty(make_form, render):
+    """A non-required string field should accept empty input."""
+    frm = make_form(
+        form.Question(
+            key="x",
+            type="string",
+            title="X",
+            description="",
+            default="",
+            required=False,
+        )
+    )
+    assert render(frm, [""])["x"] == ""
+
+
 def test_hidden_field_not_in_user_answers(make_form):
     """Hidden computed fields are never added to _user_answers."""
     frm = make_form(

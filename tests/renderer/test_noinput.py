@@ -338,3 +338,34 @@ def test_validation_error_raises_with_message():
     )
     with pytest.raises(ValueError, match="custom error message"):
         _replay(frm)
+
+
+def test_required_field_with_empty_default_raises():
+    """A required field with an empty default raises ValueError in no-input mode."""
+    frm = _form(
+        form.Question(
+            key="name",
+            type="string",
+            title="Name",
+            description="",
+            default="",
+            required=True,
+        )
+    )
+    with pytest.raises(ValueError, match="'name'"):
+        _replay(frm)
+
+
+def test_required_field_with_value_passes():
+    """A required field with a non-empty default completes normally."""
+    frm = _form(
+        form.Question(
+            key="name",
+            type="string",
+            title="Name",
+            description="",
+            default="Alice",
+            required=True,
+        )
+    )
+    assert _replay(frm)["name"] == "Alice"

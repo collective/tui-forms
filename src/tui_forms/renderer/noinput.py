@@ -55,6 +55,10 @@ class NoInputRenderer(BaseRenderer):
         elif isinstance(question, form.QuestionChoice):
             func = self._ask_choice
         answer = func(question, default, prefix)
+        if question.required and answer in ("", [], None):
+            raise ValueError(
+                f"Required field '{question.key}' has no value in no-input mode."
+            )
         if question.validator is not None:
             try:
                 valid = question.validator(str(answer))

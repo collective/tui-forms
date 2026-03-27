@@ -54,6 +54,7 @@ class BaseQuestion:
     condition: list[Condition] | None = None
     validator: AnswerValidator | None = None
     hidden: bool = False
+    required: bool = False
 
     def _render_variable(
         self, env: Environment, answers: dict[str, Any], value: Any, root_key: str = ""

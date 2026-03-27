@@ -118,6 +118,10 @@ class BaseRenderer(ABC):
             func = self._ask_choice
         answer = func(question, default, prefix)
         while True:
+            if question.required and answer in ("", [], None):
+                self._validation_error(question, "This field is required.")
+                answer = func(question, default, prefix)
+                continue
             if question.validator is not None:
                 try:
                     valid = question.validator(str(answer))
