@@ -195,15 +195,19 @@ The available options are in `question.options`.
 
 ```python
 @abstractmethod
-def _validation_error(self, question: BaseQuestion) -> None
+def _validation_error(
+    self, question: BaseQuestion, message: str | None
+) -> None
 ```
 
-Display an error message when the user's answer fails the field's validator.
+Display an error message when the user's answer fails the field's validator or
+a required field is left empty.
 Called automatically by the rendering pipeline before re-prompting the question.
 
 | Parameter | Type | Description |
 |---|---|---|
 | `question` | `BaseQuestion` | The question whose answer failed validation. |
+| `message` | `str \| None` | The specific error message from the validator (when the validator raised `ValidationError`), or `None` for a generic "please try again" prompt. For `required` failures the pipeline passes `"This field is required."`. |
 
 ---
 
@@ -243,7 +247,8 @@ The following attributes are available to every renderer.
 | `description` | `str` | Optional hint text shown below the title. May be an empty string. |
 | `default` | `Any` | The raw default from the schema (before {term}`Jinja2` rendering and before pre-populated answer lookup). Use the resolved `default` argument passed to the abstract method instead. |
 | `options` | `list[QuestionOption] \| None` | Available choices for `_ask_choice` and `_ask_multiple`. `None` for other types. |
-| `validator` | `AnswerValidator \| None` | A callable `(value: str) -> bool` that validates free-text input. `None` if no validation is defined. The pipeline calls `_validation_error` and re-prompts automatically when validation fails. |
+| `required` | `bool` | `True` if the field is listed in the top-level `required` array of the schema. The pipeline calls `_validation_error` and re-prompts when the answer is empty (`""`, `[]`, or `None`). |
+| `validator` | `AnswerValidator \| None` | A callable `(value: str) -> bool \| raises ValidationError` that validates free-text input. `None` if no validation is defined. The pipeline calls `_validation_error` and re-prompts automatically when validation fails. |
 
 ## QuestionOption
 

@@ -48,7 +48,8 @@ answers dict.
 
 The `if` condition must follow the pattern
 `{properties: {key: {const: value}}}`.
-Only a single key–value pair per `if` block is supported.
+Multiple key–value pairs in a single `if` block are supported; all conditions
+must match for the `then` questions to become active.
 
 ## Step 1—Define the base question
 

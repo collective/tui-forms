@@ -55,17 +55,32 @@ class NoInputRenderer(BaseRenderer):
         elif isinstance(question, form.QuestionChoice):
             func = self._ask_choice
         answer = func(question, default, prefix)
-        if question.validator is not None and not question.validator(str(answer)):
+        if question.required and answer in ("", [], None):
             raise ValueError(
-                f"Default value {answer!r} for '{question.key}' "
-                f"fails validation in no-input mode."
+                f"Required field '{question.key}' has no value in no-input mode."
             )
+        if question.validator is not None:
+            try:
+                valid = question.validator(str(answer))
+            except form.ValidationError as exc:
+                raise ValueError(
+                    f"Default value {answer!r} for '{question.key}' "
+                    f"fails validation: {exc}"
+                ) from exc
+            if not valid:
+                raise ValueError(
+                    f"Default value {answer!r} for '{question.key}' "
+                    f"fails validation in no-input mode."
+                )
         return answer
 
-    def _validation_error(self, question: form.BaseQuestion) -> None:
+    def _validation_error(
+        self, question: form.BaseQuestion, message: str | None
+    ) -> None:
         """No-op: there is no user to display a validation error to.
 
         :param question: The question whose answer failed validation.
+        :param message: Unused.
         """
 
     def _ask_string(

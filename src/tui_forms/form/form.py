@@ -41,15 +41,16 @@ class Form:
         return self._count_visible(self.questions)
 
     def is_active(self, question: BaseQuestion) -> bool:
-        """Return True if the question's condition is satisfied by the current answers.
+        """Return True if all of the question's conditions are satisfied.
 
         :param question: The question to check.
         :return: True when the question should be shown or computed.
         """
         if question.condition is None:
             return True
-        return (
-            self.answers.get(question.condition["key"]) == question.condition["value"]
+        return all(
+            self.answers.get(cond["key"]) == cond["value"]
+            for cond in question.condition
         )
 
     def start(self) -> None:

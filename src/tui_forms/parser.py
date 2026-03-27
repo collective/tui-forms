@@ -99,18 +99,19 @@ def _extract_options(
     return options
 
 
-def _extract_condition(if_block: dict[str, Any]) -> form.Condition | None:
-    """Extract a Condition from a JSON Schema if-block.
+def _extract_condition(if_block: dict[str, Any]) -> list[form.Condition] | None:
+    """Extract all conditions from a JSON Schema if-block.
 
     Handles the pattern: if: {properties: {key: {const: value}}}
+    All property conditions are collected and evaluated with AND logic.
     """
     properties = if_block.get("properties", {})
-    condition: form.Condition | None = None
-    for key, value_schema in properties.items():
-        if "const" in value_schema:
-            condition = {"key": key, "value": value_schema["const"]}
-            break
-    return condition
+    conditions: list[form.Condition] = [
+        {"key": key, "value": value_schema["const"]}
+        for key, value_schema in properties.items()
+        if "const" in value_schema
+    ]
+    return conditions if conditions else None
 
 
 def _select_question_class(
@@ -149,9 +150,14 @@ def _build_subquestions(
     """
     subquestions: list[form.BaseQuestion] = []
     seen_keys: set[str] = set()
+    required_keys: list[str] = prop_schema.get("required", [])
 
     for sub_key, sub_prop in prop_schema.get("properties", {}).items():
-        subquestions.append(_parse_property(sub_key, sub_prop, schema))
+        subquestions.append(
+            _parse_property(
+                sub_key, sub_prop, schema, required=sub_key in required_keys
+            )
+        )
         seen_keys.add(sub_key)
 
     for allof_item in prop_schema.get("allOf", []):
@@ -161,10 +167,15 @@ def _build_subquestions(
         if "$ref" in then:
             then = _resolve_ref(schema, then["$ref"])
         question_condition = _extract_condition(allof_item.get("if", {}))
+        then_required: list[str] = then.get("required", [])
         for sub_key, sub_prop in then.get("properties", {}).items():
             if sub_key not in seen_keys:
                 sq = _parse_property(
-                    sub_key, sub_prop, schema, condition=question_condition
+                    sub_key,
+                    sub_prop,
+                    schema,
+                    condition=question_condition,
+                    required=sub_key in then_required,
                 )
                 subquestions.append(sq)
                 seen_keys.add(sub_key)
@@ -176,7 +187,8 @@ def _parse_property(
     key: str,
     prop_schema: dict[str, Any],
     schema: dict[str, Any],
-    condition: form.Condition | None = None,
+    condition: list[form.Condition] | None = None,
+    required: bool = False,
 ) -> form.BaseQuestion:
     """Parse a single schema property into a BaseQuestion instance."""
     if "$ref" in prop_schema:
@@ -228,6 +240,7 @@ def _parse_property(
         subquestions=subquestions,
         condition=condition,
         validator=validator,
+        required=required,
     )
 
 
@@ -243,8 +256,9 @@ def jsonschema_to_form(schema: dict[str, Any], root_key: str = "") -> form.Form:
     jsonschema.validate(schema, _FORM_SCHEMA)
     title = schema.get("title", "")
     description = schema.get("description", "")
+    required_keys: list[str] = schema.get("required", [])
     questions = [
-        _parse_property(key, prop_schema, schema)
+        _parse_property(key, prop_schema, schema, required=key in required_keys)
         for key, prop_schema in schema.get("properties", {}).items()
     ]
     return form.Form(

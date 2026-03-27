@@ -43,8 +43,11 @@ class AnswerValidator(Protocol):
 
 When a question has a validator, `BaseRenderer._dispatch()` calls it with the
 user's raw input (always a `str`) after every answer.
-If it returns `False`, `_validation_error()` is called and the question is
-asked again.
+If it returns `False`, `_validation_error()` is called with `message=None` and
+the question is asked again.
+Alternatively, the validator can raise `ValidationError` with a specific
+message; the message is forwarded to `_validation_error()` so the user sees
+exactly why the input was rejected.
 This loop repeats until the validator returns `True`.
 
 ## Step 1—Parse the schema
@@ -182,6 +185,45 @@ Run the script and enter an invalid port, for example `80`:
 
 The question is repeated until the user enters a value that satisfies
 `is_valid_port`.
+
+## Surfacing a specific error message
+
+By default, when a validator returns `False`, the renderer shows a generic
+"Invalid input" message.
+To show a more informative message, raise `ValidationError` from your validator
+instead:
+
+```python
+from tui_forms.form import ValidationError
+
+
+def is_valid_port(value: str) -> bool:
+    try:
+        port = int(value)
+    except ValueError:
+        raise ValidationError(f"'{value}' is not an integer.")
+    if not (1024 <= port <= 65535):
+        raise ValidationError(
+            f"Port must be between 1024 and 65535, got {port}."
+        )
+    return True
+```
+
+The renderer passes the exception message straight to `_validation_error()`,
+so the user sees the exact reason their input was rejected:
+
+```
+[2/2] Port
+  Must be between 1024 and 65535.
+  [8080] 80
+  Port must be between 1024 and 65535, got 80.
+[2/2] Port
+  Must be between 1024 and 65535.
+  [8080] 8443
+```
+
+`ValidationError` is available from `tui_forms.form` or from the top-level
+`tui_forms` package.
 
 ## Using a class or lambda
 

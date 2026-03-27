@@ -264,15 +264,15 @@ def test_unconditional_subquestion_has_no_condition(plone_form):
 @pytest.mark.parametrize(
     "key,expected_condition",
     [
-        ("oidc-server_url", {"key": "provider", "value": "keycloak"}),
-        ("oidc-issuer", {"key": "provider", "value": "oidc"}),
+        ("oidc-server_url", [{"key": "provider", "value": "keycloak"}]),
+        ("oidc-issuer", [{"key": "provider", "value": "oidc"}]),
         (
             "authomatic-github-consumer_key",
-            {"key": "provider", "value": "authomatic-github"},
+            [{"key": "provider", "value": "authomatic-github"}],
         ),
         (
             "authomatic-google-consumer_key",
-            {"key": "provider", "value": "authomatic-google"},
+            [{"key": "provider", "value": "authomatic-google"}],
         ),
     ],
 )
@@ -280,3 +280,23 @@ def test_conditional_subquestion_condition(plone_form, key, expected_condition):
     """Each conditional subquestion should carry the expected condition."""
     sq = _subquestion(plone_form, "authentication", key)
     assert sq.condition == expected_condition
+
+
+# --- Required field tests ---
+
+
+@pytest.mark.parametrize(
+    "key,expected_required",
+    [
+        ("site_id", True),
+        ("title", True),
+        ("available_languages", True),
+        ("workflow", True),
+        ("authentication", True),
+        ("default_language", False),
+    ],
+)
+def test_required_flag_parsed(plone_form, key, expected_required):
+    """Questions listed in the schema required array should have required=True."""
+    q = _question(plone_form, key)
+    assert q.required is expected_required

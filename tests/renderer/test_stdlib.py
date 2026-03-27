@@ -301,7 +301,7 @@ def test_condition_satisfied_question_is_asked(make_form, render):
             title="Secret",
             description="",
             default="",
-            condition={"key": "provider", "value": "b"},
+            condition=[{"key": "provider", "value": "b"}],
         ),
     )
     assert render(frm, ["2", "mypassword"])["secret"] == "mypassword"
@@ -324,7 +324,7 @@ def test_condition_not_satisfied_question_skipped(make_form, render):
             title="Secret",
             description="",
             default="",
-            condition={"key": "provider", "value": "b"},
+            condition=[{"key": "provider", "value": "b"}],
         ),
     )
     assert "secret" not in render(frm, [""])
@@ -350,7 +350,7 @@ def test_hidden_condition_satisfied_is_computed(make_form, render):
             title="Flag",
             description="",
             default="enabled",
-            condition={"key": "mode", "value": "full"},
+            condition=[{"key": "mode", "value": "full"}],
         ),
     )
     assert render(frm, [""])["flag"] == "enabled"
@@ -376,7 +376,7 @@ def test_hidden_condition_not_satisfied_skipped(make_form, render):
             title="Flag",
             description="",
             default="enabled",
-            condition={"key": "mode", "value": "lite"},
+            condition=[{"key": "mode", "value": "lite"}],
         ),
     )
     assert "flag" not in render(frm, [""])
@@ -475,6 +475,35 @@ def test_invalid_answer_retries_until_valid(make_form, render):
     assert render(frm, ["banana", "avocado"])["x"] == "avocado"
 
 
+def test_validation_error_message_is_displayed(make_form):
+    """A ValidationError raised by the validator should display its message."""
+    from tui_forms.form import ValidationError
+
+    def strict_validator(value: str) -> bool:
+        if not value.startswith("https://"):
+            raise ValidationError("URL must start with https://")
+        return True
+
+    frm = make_form(
+        form.Question(
+            key="url",
+            type="string",
+            title="URL",
+            description="",
+            default="",
+            validator=strict_validator,
+        )
+    )
+    with (
+        patch("builtins.input", side_effect=["http://bad.com", "https://ok.com"]),
+        patch("builtins.print") as mock_print,
+    ):
+        result = StdlibRenderer(frm).render()
+    assert result["url"] == "https://ok.com"
+    printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
+    assert "URL must start with https://" in printed
+
+
 def test_no_validator_accepts_any_answer(make_form, render):
     """Without a validator, any answer should be accepted."""
     frm = make_form(
@@ -504,6 +533,52 @@ def test_interactive_renderer_populates_user_answers(make_form):
     with patch("builtins.input", side_effect=["x", "y"]), patch("builtins.print"):
         StdlibRenderer(frm).render()
     assert frm._user_answers == {"a", "b"}
+
+
+# ---------------------------------------------------------------------------
+# required field tests
+# ---------------------------------------------------------------------------
+
+
+def test_required_field_retries_on_empty(make_form, render):
+    """A required string field should re-prompt when the user submits empty input."""
+    frm = make_form(
+        form.Question(
+            key="x", type="string", title="X", description="", default="", required=True
+        )
+    )
+    assert render(frm, ["", "hello"])["x"] == "hello"
+
+
+def test_required_field_prints_error_on_empty(make_form):
+    """A required string field should print an error message on empty input."""
+    frm = make_form(
+        form.Question(
+            key="x", type="string", title="X", description="", default="", required=True
+        )
+    )
+    with (
+        patch("builtins.input", side_effect=["", "hello"]),
+        patch("builtins.print") as mock_print,
+    ):
+        StdlibRenderer(frm).render()
+    printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
+    assert "required" in printed
+
+
+def test_non_required_field_accepts_empty(make_form, render):
+    """A non-required string field should accept empty input."""
+    frm = make_form(
+        form.Question(
+            key="x",
+            type="string",
+            title="X",
+            description="",
+            default="",
+            required=False,
+        )
+    )
+    assert render(frm, [""])["x"] == ""
 
 
 def test_hidden_field_not_in_user_answers(make_form):

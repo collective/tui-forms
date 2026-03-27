@@ -1,0 +1,1 @@
+`_extract_condition` now collects all property conditions from `if` blocks instead of stopping at the first one; `Form.is_active` evaluates them with AND logic so a question is only shown when every condition is met. @ericof

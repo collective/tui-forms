@@ -96,7 +96,9 @@ class BaseRenderer(ABC):
         """Dispatch to the appropriate ask method based on question type.
 
         Computes the prefix from the current question index before
-        delegating to the concrete ask method.
+        delegating to the concrete ask method.  Re-asks on validation
+        failure, passing the validator's error message (if any) to
+        ``_validation_error``.
 
         :param question: The question to ask.
         :return: The user's answer.
@@ -115,16 +117,34 @@ class BaseRenderer(ABC):
         elif isinstance(question, form.QuestionChoice):
             func = self._ask_choice
         answer = func(question, default, prefix)
-        while question.validator is not None and not question.validator(str(answer)):
-            self._validation_error(question)
-            answer = func(question, default, prefix)
+        while True:
+            if question.required and answer in ("", [], None):
+                self._validation_error(question, "This field is required.")
+                answer = func(question, default, prefix)
+                continue
+            if question.validator is not None:
+                try:
+                    valid = question.validator(str(answer))
+                except form.ValidationError as exc:
+                    self._validation_error(question, str(exc))
+                    answer = func(question, default, prefix)
+                    continue
+                if not valid:
+                    self._validation_error(question, None)
+                    answer = func(question, default, prefix)
+                    continue
+            break
         return answer
 
     @abstractmethod
-    def _validation_error(self, question: form.BaseQuestion) -> None:
+    def _validation_error(
+        self, question: form.BaseQuestion, message: str | None
+    ) -> None:
         """Show an error message when a validator rejects the user's answer.
 
         :param question: The question whose answer failed validation.
+        :param message: Specific error message from the validator, or ``None``
+            for a generic retry prompt.
         """
 
     @abstractmethod

@@ -1,0 +1,1 @@
+Added `ValidationError` exception class so validators can surface a specific error message; `_dispatch()` now catches it and forwards the message to `_validation_error()`. `NoInputRenderer` raises `ValueError` with the message included instead of silently looping. @ericof

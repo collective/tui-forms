@@ -18,12 +18,16 @@ class StdlibRenderer(BaseRenderer):
         if question.description:
             print(f"  {question.description}")
 
-    def _validation_error(self, question: BaseQuestion) -> None:
+    def _validation_error(self, question: BaseQuestion, message: str | None) -> None:
         """Print an error when the validator rejects the user's answer.
 
         :param question: The question whose answer failed validation.
+        :param message: Specific error message, or ``None`` for a generic prompt.
         """
-        print(f"  Invalid answer for '{question.title}'. Please try again.")
+        if message:
+            print(f"  {message}")
+        else:
+            print(f"  Invalid answer for '{question.title}'. Please try again.")
 
     def _ask_string(self, question: BaseQuestion, default: Any, prefix: str) -> str:
         """Ask a free-text question using input().

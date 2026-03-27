@@ -317,3 +317,55 @@ def test_noinput_user_answers_is_empty_after_render():
     )
     NoInputRenderer(frm).render()
     assert frm._user_answers == set()
+
+
+def test_validation_error_raises_with_message():
+    """ValidationError raised by validator surfaces its message in the ValueError."""
+    from tui_forms.form import ValidationError
+
+    def strict(value: str) -> bool:
+        raise ValidationError("custom error message")
+
+    frm = _form(
+        form.Question(
+            key="x",
+            type="string",
+            title="X",
+            description="",
+            default="anything",
+            validator=strict,
+        )
+    )
+    with pytest.raises(ValueError, match="custom error message"):
+        _replay(frm)
+
+
+def test_required_field_with_empty_default_raises():
+    """A required field with an empty default raises ValueError in no-input mode."""
+    frm = _form(
+        form.Question(
+            key="name",
+            type="string",
+            title="Name",
+            description="",
+            default="",
+            required=True,
+        )
+    )
+    with pytest.raises(ValueError, match="'name'"):
+        _replay(frm)
+
+
+def test_required_field_with_value_passes():
+    """A required field with a non-empty default completes normally."""
+    frm = _form(
+        form.Question(
+            key="name",
+            type="string",
+            title="Name",
+            description="",
+            default="Alice",
+            required=True,
+        )
+    )
+    assert _replay(frm)["name"] == "Alice"
