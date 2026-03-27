@@ -181,7 +181,7 @@ A question defined inside a `then` block is only shown—or computed—when the 
 
 Each `if` block follows the pattern `{properties: {key: {const: value}}}`.
 When the user's answer for `key` equals `value`, the `then` questions become active.
-Multiple key-value pairs in a single `if` block are supported; all conditions must match (AND logic).
+Multiple key-value pairs in a single `if` block are supported; all conditions must match for the `then` questions to become active.
 
 ```json
 {
