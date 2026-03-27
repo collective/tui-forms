@@ -179,8 +179,9 @@ Answers are stored flat (not nested under the object key).
 TUI Forms supports `allOf` blocks with `if/then` pairs.
 A question defined inside a `then` block is only shown—or computed—when the `if` condition matches the current answers.
 
-The `if` condition must follow the pattern `{properties: {key: {const: value}}}`.
+Each `if` block follows the pattern `{properties: {key: {const: value}}}`.
 When the user's answer for `key` equals `value`, the `then` questions become active.
+Multiple key-value pairs in a single `if` block are supported; all conditions must match (AND logic).
 
 ```json
 {
@@ -211,6 +212,36 @@ When the user's answer for `key` equals `value`, the `then` questions become act
   ]
 }
 ```
+
+---
+
+## Required fields
+
+List field keys in the top-level `required` array to mark them as mandatory.
+The renderer will re-prompt if the user submits an empty value (`""`, `[]`, or nothing).
+
+```json
+{
+  "required": ["site_id", "admin_email"],
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "title": "Site identifier"
+    },
+    "admin_email": {
+      "type": "string",
+      "format": "email",
+      "title": "Admin email"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    }
+  }
+}
+```
+
+`site_id` and `admin_email` must receive a non-empty answer; `description` is optional.
 
 ---
 
@@ -369,6 +400,8 @@ invalid path raises immediately rather than at render time.
 
 When the user's input fails the validator, the renderer calls
 `_validation_error()` and re-prompts until the validator returns `True`.
+To surface a specific error message, raise `tui_forms.form.ValidationError` from
+the validator instead of (or instead of returning `False`); the message is forwarded to `_validation_error()`.
 
 An **empty string** is treated as no validator (useful as a placeholder in
 schema files).
