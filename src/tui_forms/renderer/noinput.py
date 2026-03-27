@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from tui_forms import form
 from tui_forms.renderer.base import BaseRenderer
 from typing import Any
@@ -26,6 +27,40 @@ class NoInputRenderer(BaseRenderer):
         :return: A flat dict mapping each question key to its answer.
         """
         return super().render(initial_answers)
+
+    def _dispatch(self, question: form.BaseQuestion) -> Any:
+        """Dispatch to the appropriate ask method and raise on validation failure.
+
+        Overrides the base implementation to avoid an infinite loop: since
+        ``_validation_error`` is a no-op and ``_ask_*`` always returns the same
+        default, the base ``while`` loop would never terminate when validation
+        fails.  Instead, raise ``ValueError`` immediately so callers get a
+        clear, actionable error.
+
+        :param question: The question to process.
+        :return: The resolved default value.
+        :raises ValueError: If the default value fails the question's validator.
+        """
+        prefix = self._format_prefix(
+            self._form.question_index, self._form.question_total
+        )
+        default = question.default_value(
+            self._env, self._form.answers, self._form.root_key
+        )
+        func: Callable[[form.BaseQuestion, Any, str], Any] = self._ask_string
+        if isinstance(question, form.QuestionBoolean):
+            func = self._ask_boolean
+        elif isinstance(question, form.QuestionMultiple):
+            func = self._ask_multiple
+        elif isinstance(question, form.QuestionChoice):
+            func = self._ask_choice
+        answer = func(question, default, prefix)
+        if question.validator is not None and not question.validator(str(answer)):
+            raise ValueError(
+                f"Default value {answer!r} for '{question.key}' "
+                f"fails validation in no-input mode."
+            )
+        return answer
 
     def _validation_error(self, question: form.BaseQuestion) -> None:
         """No-op: there is no user to display a validation error to.

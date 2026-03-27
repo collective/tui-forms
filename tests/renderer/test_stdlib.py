@@ -91,6 +91,22 @@ def test_boolean_invalid_input_retries(make_form, render):
     assert render(frm, ["maybe", "n"])["b"] is False
 
 
+def test_boolean_invalid_input_prints_error(make_form):
+    """Invalid boolean input should print an error message before re-prompting."""
+    frm = make_form(
+        form.QuestionBoolean(
+            key="b", type="boolean", title="B", description="", default=True
+        )
+    )
+    with (
+        patch("builtins.input", side_effect=["oops", "y"]) as _inp,
+        patch("builtins.print") as mock_print,
+    ):
+        StdlibRenderer(frm).render()
+    printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
+    assert "y or n" in printed
+
+
 # --- Choice question tests ---
 
 
@@ -132,6 +148,27 @@ def test_choice_invalid_input_retries(make_form, render):
     assert render(frm, ["99", "2"])["c"] == "b"
 
 
+def test_choice_invalid_input_prints_error(make_form):
+    """Invalid choice input should print an error message before re-prompting."""
+    frm = make_form(
+        form.QuestionChoice(
+            key="c",
+            type="string",
+            title="C",
+            description="",
+            default="a",
+            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
+        )
+    )
+    with (
+        patch("builtins.input", side_effect=["99", "1"]),
+        patch("builtins.print") as mock_print,
+    ):
+        StdlibRenderer(frm).render()
+    printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
+    assert "1 and 2" in printed
+
+
 # --- Multiple question tests ---
 
 
@@ -171,6 +208,27 @@ def test_multiple_invalid_input_retries(make_form, render):
         )
     )
     assert render(frm, ["99", "1"])["m"] == ["a"]
+
+
+def test_multiple_invalid_input_prints_error(make_form):
+    """Invalid multiple-choice input should print an error message before re-prompting."""
+    frm = make_form(
+        form.QuestionMultiple(
+            key="m",
+            type="array",
+            title="M",
+            description="",
+            default=["a"],
+            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
+        )
+    )
+    with (
+        patch("builtins.input", side_effect=["99", "1"]),
+        patch("builtins.print") as mock_print,
+    ):
+        StdlibRenderer(frm).render()
+    printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
+    assert "1 and 2" in printed
 
 
 # --- Hidden question tests ---

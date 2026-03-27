@@ -1,4 +1,5 @@
 from tui_forms.form import form
+from tui_forms.parser import _resolve_ref
 from tui_forms.parser import jsonschema_to_form
 
 import jsonschema
@@ -39,3 +40,10 @@ def test_invalid_schema_raises(invalid_schema):
     """Schemas missing required fields or of wrong type should raise ValidationError."""
     with pytest.raises(jsonschema.ValidationError):
         jsonschema_to_form(invalid_schema)
+
+
+def test_resolve_ref_bad_path_raises_value_error():
+    """_resolve_ref raises ValueError with the full ref path when a segment is missing."""
+    schema = {"$defs": {"Foo": {"type": "string"}}}
+    with pytest.raises(ValueError, match=r"\$ref.*#/\$defs/Missing"):
+        _resolve_ref(schema, "#/$defs/Missing")

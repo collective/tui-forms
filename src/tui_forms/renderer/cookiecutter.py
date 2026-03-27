@@ -86,6 +86,7 @@ class CookiecutterRenderer(BaseRenderer):
                 return True
             if value in ("n", "no"):
                 return False
+            self._console.print("  [red]Please enter y or n.[/]")
 
     def _ask_choice(self, question: BaseQuestion, default: Any, prefix: str) -> Any:
         """Ask a single-choice question using a numbered list.
@@ -120,6 +121,9 @@ class CookiecutterRenderer(BaseRenderer):
                 idx = int(value) - 1
                 if 0 <= idx < len(options):
                     return options[idx]["const"]
+            self._console.print(
+                f"  [red]Please enter a number between 1 and {len(options)}.[/]"
+            )
 
     def _ask_multiple(self, question: BaseQuestion, default: Any, prefix: str) -> list:
         """Ask a multiple-choice question using a numbered list.
@@ -160,3 +164,7 @@ class CookiecutterRenderer(BaseRenderer):
                 p.isdigit() and 1 <= int(p) <= len(options) for p in parts
             ):
                 return [options[int(p) - 1]["const"] for p in parts]
+            n = len(options)
+            self._console.print(
+                f"  [red]Please enter comma-separated numbers between 1 and {n}.[/]"
+            )

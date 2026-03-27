@@ -88,9 +88,16 @@ following the same rules as every other renderer.
 ## Validation
 
 Validator functions attached to questions are invoked as normal.
-When an answer fails validation the `_validation_error` hook is a no-op—no output
-is produced and the failing answer is accepted as-is.
-If strict validation is required, validate `initial_answers` before passing them to `render()`.
+When an answer fails validation a `ValueError` is raised immediately, because there is
+no user to re-prompt and the loop would never terminate otherwise.
+
+```python
+# Raises ValueError if the default value for any question fails its validator.
+answers = renderer.render(initial_answers=previous)
+```
+
+Ensure that pre-populated answers (and schema defaults) satisfy all validators before
+calling `render()`, or catch the `ValueError` in your calling code.
 
 ---
 
