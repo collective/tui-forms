@@ -118,4 +118,6 @@ class StdlibRenderer(BaseRenderer):
                 p.isdigit() and 1 <= int(p) <= len(options) for p in parts
             ):
                 return [options[int(p) - 1]["const"] for p in parts]
-            print(f"  Please enter comma-separated numbers between 1 and {len(options)}.")
+            print(
+                f"  Please enter comma-separated numbers between 1 and {len(options)}."
+            )

@@ -1,7 +1,8 @@
-import pytest
 from tui_forms import form
 from tui_forms.renderer.base import BaseRenderer
 from tui_forms.renderer.noinput import NoInputRenderer
+
+import pytest
 
 
 # ---------------------------------------------------------------------------
