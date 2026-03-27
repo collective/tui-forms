@@ -65,7 +65,12 @@ def _resolve_ref(schema: dict[str, Any], ref: str) -> dict[str, Any]:
     parts = ref.lstrip("#/").split("/")
     result = schema
     for part in parts:
-        result = result[part]
+        try:
+            result = result[part]
+        except KeyError:
+            raise ValueError(
+                f"Cannot resolve $ref {ref!r}: '{part}' not found in schema."
+            )
     return result
 
 

@@ -1,0 +1,1 @@
+``$ref`` resolution now raises ``ValueError`` with the full reference path when a segment is missing, instead of a bare ``KeyError``. @ericof
