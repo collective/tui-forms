@@ -115,6 +115,29 @@ When no options are pre-selected, the default shows as `none`:
 
 ---
 
+## Invalid input format
+
+When the user enters a value that does not match the expected format (for example,
+text instead of `y`/`n` for a boolean, or an out-of-range number for a choice),
+an error is printed in red and the same prompt is shown again:
+
+```text
+  [2/4] Include tests? (Yes): maybe
+  Please enter y or n.
+  [2/4] Include tests? (Yes):
+```
+
+```text
+  [3/4] License
+    1 - MIT
+    2 - Apache 2.0
+    Choose from [1/2] (1): 99
+  Please enter a number between 1 and 2.
+    Choose from [1/2] (1):
+```
+
+---
+
 ## Validation error
 
 When a field has a validator and the answer is rejected, an error is printed in red

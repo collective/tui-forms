@@ -112,6 +112,30 @@ The user enters one or more comma-separated numbers.
 
 ---
 
+## Invalid input format
+
+When the user enters a value that does not match the expected format (for example,
+text instead of `y`/`n` for a boolean, or an out-of-range number for a choice),
+the renderer prints an error and re-shows the same prompt:
+
+```text
+[2/4] Include tests?
+  [Y/n]: maybe
+  Please enter y or n.
+  [Y/n]:
+```
+
+```text
+[3/4] License
+  > 1. MIT
+    2. Apache 2.0
+  Choice [number or enter for default]: 99
+  Please enter a number between 1 and 2.
+  Choice [number or enter for default]:
+```
+
+---
+
 ## Validation error
 
 When a field has a validator and the answer is rejected, the renderer prints an error
