@@ -93,6 +93,7 @@ def test_boolean_invalid_input_prints_error(make_form, render):
     )
     renderer = CookiecutterRenderer(frm)
     from unittest.mock import MagicMock
+
     renderer._console = MagicMock()
     renderer._console.input.side_effect = ["oops", "y"]
     renderer.render()
@@ -156,6 +157,7 @@ def test_choice_invalid_input_prints_error(make_form):
         )
     )
     from unittest.mock import MagicMock
+
     renderer = CookiecutterRenderer(frm)
     renderer._console = MagicMock()
     renderer._console.input.side_effect = ["99", "1"]
@@ -220,6 +222,7 @@ def test_multiple_invalid_input_prints_error(make_form):
         )
     )
     from unittest.mock import MagicMock
+
     renderer = CookiecutterRenderer(frm)
     renderer._console = MagicMock()
     renderer._console.input.side_effect = ["99", "1"]

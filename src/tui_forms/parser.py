@@ -67,10 +67,10 @@ def _resolve_ref(schema: dict[str, Any], ref: str) -> dict[str, Any]:
     for part in parts:
         try:
             result = result[part]
-        except KeyError:
+        except KeyError as exc:
             raise ValueError(
                 f"Cannot resolve $ref {ref!r}: '{part}' not found in schema."
-            )
+            ) from exc
     return result
 
 

@@ -98,9 +98,10 @@ def test_boolean_invalid_input_prints_error(make_form):
             key="b", type="boolean", title="B", description="", default=True
         )
     )
-    with patch("builtins.input", side_effect=["oops", "y"]) as _inp, patch(
-        "builtins.print"
-    ) as mock_print:
+    with (
+        patch("builtins.input", side_effect=["oops", "y"]) as _inp,
+        patch("builtins.print") as mock_print,
+    ):
         StdlibRenderer(frm).render()
     printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
     assert "y or n" in printed
@@ -159,9 +160,10 @@ def test_choice_invalid_input_prints_error(make_form):
             options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
         )
     )
-    with patch("builtins.input", side_effect=["99", "1"]), patch(
-        "builtins.print"
-    ) as mock_print:
+    with (
+        patch("builtins.input", side_effect=["99", "1"]),
+        patch("builtins.print") as mock_print,
+    ):
         StdlibRenderer(frm).render()
     printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
     assert "1 and 2" in printed
@@ -220,9 +222,10 @@ def test_multiple_invalid_input_prints_error(make_form):
             options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
         )
     )
-    with patch("builtins.input", side_effect=["99", "1"]), patch(
-        "builtins.print"
-    ) as mock_print:
+    with (
+        patch("builtins.input", side_effect=["99", "1"]),
+        patch("builtins.print") as mock_print,
+    ):
         StdlibRenderer(frm).render()
     printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
     assert "1 and 2" in printed
