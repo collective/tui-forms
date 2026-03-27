@@ -475,6 +475,35 @@ def test_invalid_answer_retries_until_valid(make_form, render):
     assert render(frm, ["banana", "avocado"])["x"] == "avocado"
 
 
+def test_validation_error_message_is_displayed(make_form):
+    """A ValidationError raised by the validator should display its message."""
+    from tui_forms.form import ValidationError
+
+    def strict_validator(value: str) -> bool:
+        if not value.startswith("https://"):
+            raise ValidationError("URL must start with https://")
+        return True
+
+    frm = make_form(
+        form.Question(
+            key="url",
+            type="string",
+            title="URL",
+            description="",
+            default="",
+            validator=strict_validator,
+        )
+    )
+    with (
+        patch("builtins.input", side_effect=["http://bad.com", "https://ok.com"]),
+        patch("builtins.print") as mock_print,
+    ):
+        result = StdlibRenderer(frm).render()
+    assert result["url"] == "https://ok.com"
+    printed = " ".join(str(c) for call in mock_print.call_args_list for c in call.args)
+    assert "URL must start with https://" in printed
+
+
 def test_no_validator_accepts_any_answer(make_form, render):
     """Without a validator, any answer should be accepted."""
     frm = make_form(

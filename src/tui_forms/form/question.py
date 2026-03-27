@@ -9,6 +9,21 @@ from typing import TypedDict
 _NOVALUE = object()
 
 
+class ValidationError(Exception):
+    """Raised by an AnswerValidator to report a validation failure with a message.
+
+    Raise this instead of returning ``False`` when you want the renderer to
+    display a specific error message rather than the generic retry prompt.
+
+    Example::
+
+        def my_validator(value: str) -> bool:
+            if not value.startswith("https://"):
+                raise ValidationError("URL must start with https://")
+            return True
+    """
+
+
 class AnswerValidator(Protocol):
     """Protocol for callables that validate a question answer."""
 

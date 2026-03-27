@@ -317,3 +317,24 @@ def test_noinput_user_answers_is_empty_after_render():
     )
     NoInputRenderer(frm).render()
     assert frm._user_answers == set()
+
+
+def test_validation_error_raises_with_message():
+    """ValidationError raised by validator surfaces its message in the ValueError."""
+    from tui_forms.form import ValidationError
+
+    def strict(value: str) -> bool:
+        raise ValidationError("custom error message")
+
+    frm = _form(
+        form.Question(
+            key="x",
+            type="string",
+            title="X",
+            description="",
+            default="anything",
+            validator=strict,
+        )
+    )
+    with pytest.raises(ValueError, match="custom error message"):
+        _replay(frm)
