@@ -1,3 +1,4 @@
+import pytest
 from tui_forms import form
 from tui_forms.renderer.base import BaseRenderer
 from tui_forms.renderer.noinput import NoInputRenderer
@@ -273,6 +274,37 @@ def test_render_with_no_args_uses_schema_defaults():
 # ---------------------------------------------------------------------------
 # _user_answers
 # ---------------------------------------------------------------------------
+
+
+def test_validation_failure_raises_value_error():
+    """When a default value fails validation, ValueError is raised immediately."""
+    frm = _form(
+        form.Question(
+            key="name",
+            type="string",
+            title="Name",
+            description="",
+            default="bad",
+            validator=lambda v: v != "bad",
+        )
+    )
+    with pytest.raises(ValueError, match="'name'"):
+        _replay(frm)
+
+
+def test_valid_default_with_validator_passes():
+    """When a default value passes validation, render() completes normally."""
+    frm = _form(
+        form.Question(
+            key="name",
+            type="string",
+            title="Name",
+            description="",
+            default="good",
+            validator=lambda v: v == "good",
+        )
+    )
+    assert _replay(frm)["name"] == "good"
 
 
 def test_noinput_user_answers_is_empty_after_render():
