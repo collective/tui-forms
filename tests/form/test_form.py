@@ -74,7 +74,28 @@ def test_is_active_with_condition(make_question, answers, expected):
     """A question with a condition is active only when the condition is satisfied."""
     frm = Form(title="T", description="", questions=[])
     frm.answers.update(answers)
-    q = make_question("x", condition={"key": "provider", "value": "keycloak"})
+    q = make_question("x", condition=[{"key": "provider", "value": "keycloak"}])
+    assert frm.is_active(q) is expected
+
+
+@pytest.mark.parametrize(
+    "answers,expected",
+    [
+        ({"a": "1", "b": "2"}, True),
+        ({"a": "1", "b": "other"}, False),
+        ({"a": "other", "b": "2"}, False),
+        ({"a": "1"}, False),
+        ({}, False),
+    ],
+)
+def test_is_active_with_multiple_conditions(make_question, answers, expected):
+    """All conditions must be satisfied (AND logic) for the question to be active."""
+    frm = Form(title="T", description="", questions=[])
+    frm.answers.update(answers)
+    q = make_question(
+        "x",
+        condition=[{"key": "a", "value": "1"}, {"key": "b", "value": "2"}],
+    )
     assert frm.is_active(q) is expected
 
 
@@ -168,7 +189,7 @@ def test_question_total_skips_inactive(make_question):
         description="",
         questions=[
             make_question("a"),
-            make_question("b", condition={"key": "a", "value": "yes"}),
+            make_question("b", condition=[{"key": "a", "value": "yes"}]),
         ],
     )
     # condition not satisfied → only 1 visible
@@ -255,7 +276,7 @@ def test_is_active_boolean_question():
         title="B",
         description="",
         default=False,
-        condition={"key": "flag", "value": "on"},
+        condition=[{"key": "flag", "value": "on"}],
     )
     frm = Form(title="T", description="", questions=[q])
     assert frm.is_active(q) is False

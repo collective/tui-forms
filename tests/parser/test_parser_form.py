@@ -264,15 +264,15 @@ def test_unconditional_subquestion_has_no_condition(plone_form):
 @pytest.mark.parametrize(
     "key,expected_condition",
     [
-        ("oidc-server_url", {"key": "provider", "value": "keycloak"}),
-        ("oidc-issuer", {"key": "provider", "value": "oidc"}),
+        ("oidc-server_url", [{"key": "provider", "value": "keycloak"}]),
+        ("oidc-issuer", [{"key": "provider", "value": "oidc"}]),
         (
             "authomatic-github-consumer_key",
-            {"key": "provider", "value": "authomatic-github"},
+            [{"key": "provider", "value": "authomatic-github"}],
         ),
         (
             "authomatic-google-consumer_key",
-            {"key": "provider", "value": "authomatic-google"},
+            [{"key": "provider", "value": "authomatic-google"}],
         ),
     ],
 )

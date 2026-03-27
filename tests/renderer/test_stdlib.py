@@ -301,7 +301,7 @@ def test_condition_satisfied_question_is_asked(make_form, render):
             title="Secret",
             description="",
             default="",
-            condition={"key": "provider", "value": "b"},
+            condition=[{"key": "provider", "value": "b"}],
         ),
     )
     assert render(frm, ["2", "mypassword"])["secret"] == "mypassword"
@@ -324,7 +324,7 @@ def test_condition_not_satisfied_question_skipped(make_form, render):
             title="Secret",
             description="",
             default="",
-            condition={"key": "provider", "value": "b"},
+            condition=[{"key": "provider", "value": "b"}],
         ),
     )
     assert "secret" not in render(frm, [""])
@@ -350,7 +350,7 @@ def test_hidden_condition_satisfied_is_computed(make_form, render):
             title="Flag",
             description="",
             default="enabled",
-            condition={"key": "mode", "value": "full"},
+            condition=[{"key": "mode", "value": "full"}],
         ),
     )
     assert render(frm, [""])["flag"] == "enabled"
@@ -376,7 +376,7 @@ def test_hidden_condition_not_satisfied_skipped(make_form, render):
             title="Flag",
             description="",
             default="enabled",
-            condition={"key": "mode", "value": "lite"},
+            condition=[{"key": "mode", "value": "lite"}],
         ),
     )
     assert "flag" not in render(frm, [""])

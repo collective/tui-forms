@@ -36,7 +36,7 @@ class BaseQuestion:
     default: Any
     options: list[QuestionOption] | None = None
     subquestions: list["BaseQuestion"] | None = None
-    condition: Condition | None = None
+    condition: list[Condition] | None = None
     validator: AnswerValidator | None = None
     hidden: bool = False
 
