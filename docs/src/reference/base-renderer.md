@@ -247,7 +247,7 @@ The following attributes are available to every renderer.
 | `description` | `str` | Optional hint text shown below the title. May be an empty string. |
 | `default` | `Any` | The raw default from the schema (before {term}`Jinja2` rendering and before pre-populated answer lookup). Use the resolved `default` argument passed to the abstract method instead. |
 | `options` | `list[QuestionOption] \| None` | Available choices for `_ask_choice` and `_ask_multiple`. `None` for other types. |
-| `required` | `bool` | `True` if the field is listed in the schema's top-level `required` array. The pipeline calls `_validation_error` and re-prompts when the answer is empty (`""`, `[]`, or `None`). |
+| `required` | `bool` | `True` if the field is listed in the top-level `required` array of the schema. The pipeline calls `_validation_error` and re-prompts when the answer is empty (`""`, `[]`, or `None`). |
 | `validator` | `AnswerValidator \| None` | A callable `(value: str) -> bool \| raises ValidationError` that validates free-text input. `None` if no validation is defined. The pipeline calls `_validation_error` and re-prompts automatically when validation fails. |
 
 ## QuestionOption
