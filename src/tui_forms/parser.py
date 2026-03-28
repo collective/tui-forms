@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from tui_forms import form
 from tui_forms.utils.validators import load_validator
-from typing import Any
+from typing import Any, Callable
 
 import jsonschema
 import re
@@ -85,7 +85,7 @@ def _check_maximum(value: str, limit: float) -> None:
         raise form.ValidationError(f"Must be \u2264 {limit}.")
 
 
-_KW_CHECKERS = {
+_KW_CHECKERS: dict[str, Callable[[str, Any], None]] = {
     "minLength": _check_min_length,
     "maxLength": _check_max_length,
     "pattern": _check_pattern,
@@ -326,10 +326,11 @@ def _parse_property(
             if validator is not None:
                 # Compose: keyword constraints run first, then the explicit validator.
                 _explicit = validator
+                _kw_captured: form.AnswerValidator = keyword_validator
 
                 def _composed(
                     value: str,
-                    _kw: form.AnswerValidator = keyword_validator,
+                    _kw: form.AnswerValidator = _kw_captured,
                     _ex: form.AnswerValidator = _explicit,
                 ) -> bool:
                     _kw(value)
