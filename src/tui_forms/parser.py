@@ -1,9 +1,9 @@
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from tui_forms import form
 from tui_forms.utils.validators import load_validator
 from typing import Any
-from collections.abc import Callable
 
 import jsonschema
 import re
