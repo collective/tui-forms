@@ -1,0 +1,1 @@
+String fields now support `minLength`, `maxLength`, `pattern`, `minimum`, and `maximum` JSONSchema keywords; these constraints are enforced during rendering with clear validation error messages. @ericof
