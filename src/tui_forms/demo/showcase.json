@@ -1,0 +1,128 @@
+{
+  "title": "TUI Forms Feature Showcase",
+  "description": "A form that exercises every feature supported by TUI Forms.",
+  "$defs": {
+    "license_options": {
+      "oneOf": [
+        {"const": "MIT", "title": "MIT License"},
+        {"const": "Apache-2.0", "title": "Apache License 2.0"},
+        {"const": "GPL-3.0", "title": "GNU General Public License v3"}
+      ]
+    }
+  },
+  "required": ["project_name", "author_email"],
+  "properties": {
+    "project_name": {
+      "type": "string",
+      "title": "Project name",
+      "description": "Required. Between 3 and 40 characters.",
+      "default": "my-project",
+      "minLength": 3,
+      "maxLength": 40
+    },
+    "slug": {
+      "type": "string",
+      "title": "Project slug",
+      "description": "Lowercase letters, digits, and hyphens only.",
+      "default": "{{ project_name | lower | replace(' ', '-') }}",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "author_email": {
+      "type": "string",
+      "title": "Author email",
+      "description": "Required. Must be a valid email address.",
+      "format": "email"
+    },
+    "release_date": {
+      "type": "string",
+      "title": "Release date",
+      "description": "Format: YYYY-MM-DD",
+      "format": "date"
+    },
+    "port": {
+      "type": "integer",
+      "title": "HTTP port",
+      "description": "Must be between 1024 and 65535.",
+      "default": 8080,
+      "minimum": 1024,
+      "maximum": 65535
+    },
+    "license": {
+      "type": "string",
+      "title": "License",
+      "default": "MIT",
+      "$ref": "#/$defs/license_options"
+    },
+    "stability": {
+      "type": "string",
+      "title": "Stability level",
+      "description": "How stable is this project?",
+      "default": "beta",
+      "enum": ["alpha", "beta", "stable", "deprecated"],
+      "enumNames": ["Alpha — experimental", "Beta — mostly stable", "Stable — production ready", "Deprecated — no longer maintained"]
+    },
+    "python_version": {
+      "type": "string",
+      "title": "Python version",
+      "description": "Minimum supported Python version.",
+      "default": "3.12",
+      "oneOf": [
+        {"const": "3.10", "title": "Python 3.10"},
+        {"const": "3.11", "title": "Python 3.11"},
+        {"const": "3.12", "title": "Python 3.12"},
+        {"const": "3.13", "title": "Python 3.13"}
+      ]
+    },
+    "extras": {
+      "type": "array",
+      "title": "Optional extras",
+      "description": "Select any extras to include.",
+      "default": ["docs"],
+      "items": {
+        "oneOf": [
+          {"const": "docs", "title": "Documentation (Sphinx)"},
+          {"const": "lint", "title": "Linting (ruff + mypy)"},
+          {"const": "ci", "title": "CI workflow (GitHub Actions)"},
+          {"const": "docker", "title": "Docker / container support"}
+        ]
+      }
+    },
+    "use_tests": {
+      "type": "boolean",
+      "title": "Include tests?",
+      "default": true
+    },
+    "schema_version": {
+      "type": "string",
+      "title": "Schema version",
+      "format": "constant",
+      "default": "1"
+    },
+    "package_name": {
+      "type": "string",
+      "title": "Package name",
+      "format": "computed",
+      "default": "{{ project_name | lower | replace('-', '_') | replace(' ', '_') }}"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"use_tests": {"const": true}}
+      },
+      "then": {
+        "properties": {
+          "test_framework": {
+            "type": "string",
+            "title": "Test framework",
+            "default": "pytest",
+            "oneOf": [
+              {"const": "pytest", "title": "pytest"},
+              {"const": "unittest", "title": "unittest (stdlib)"}
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

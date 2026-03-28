@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from tui_forms import form
@@ -50,6 +51,76 @@ def _data_url_validator(value: str) -> bool:
     return Path(value).is_file()
 
 
+def _check_min_length(value: str, limit: int) -> None:
+    if len(value) < limit:
+        plural = "s" if limit != 1 else ""
+        raise form.ValidationError(f"Must be at least {limit} character{plural}.")
+
+
+def _check_max_length(value: str, limit: int) -> None:
+    if len(value) > limit:
+        plural = "s" if limit != 1 else ""
+        raise form.ValidationError(f"Must be at most {limit} character{plural}.")
+
+
+def _check_pattern(value: str, pattern: str) -> None:
+    if not re.fullmatch(pattern, value):
+        raise form.ValidationError(f"Must match pattern: {pattern}.")
+
+
+def _check_minimum(value: str, limit: float) -> None:
+    try:
+        num = float(value)
+    except ValueError:
+        raise form.ValidationError(f"Must be a number \u2265 {limit}.") from None
+    if num < limit:
+        raise form.ValidationError(f"Must be \u2265 {limit}.")
+
+
+def _check_maximum(value: str, limit: float) -> None:
+    try:
+        num = float(value)
+    except ValueError:
+        raise form.ValidationError(f"Must be a number \u2264 {limit}.") from None
+    if num > limit:
+        raise form.ValidationError(f"Must be \u2264 {limit}.")
+
+
+_KW_CHECKERS: dict[str, Callable[[str, Any], None]] = {
+    "minLength": _check_min_length,
+    "maxLength": _check_max_length,
+    "pattern": _check_pattern,
+    "minimum": _check_minimum,
+    "maximum": _check_maximum,
+}
+
+
+def _build_keyword_validator(
+    prop_schema: dict[str, Any],
+) -> form.AnswerValidator | None:
+    """Build a validator that enforces JSONSchema constraint keywords.
+
+    Recognises ``minLength``, ``maxLength``, ``pattern`` (strings) and
+    ``minimum``, ``maximum`` (integers / numbers).  Returns ``None`` when none
+    of these keywords are present in *prop_schema*.
+    """
+    checks: list[tuple[str, Any]] = [
+        (kw, prop_schema[kw])
+        for kw in ("minLength", "maxLength", "pattern", "minimum", "maximum")
+        if kw in prop_schema
+    ]
+
+    if not checks:
+        return None
+
+    def _validator(value: str) -> bool:
+        for kw, limit in checks:
+            _KW_CHECKERS[kw](value, limit)
+        return True
+
+    return _validator
+
+
 # Map of format strings to their validator functions.
 _FORMAT_VALIDATORS: dict[str, form.AnswerValidator] = {
     "date": _date_validator,
@@ -74,29 +145,49 @@ def _resolve_ref(schema: dict[str, Any], ref: str) -> dict[str, Any]:
     return result
 
 
+def _extract_enum_options(prop_schema: dict[str, Any]) -> list[form.QuestionOption]:
+    """Build options from a bare ``enum`` list, with optional ``enumNames`` labels."""
+    enum_names: list[str] = prop_schema.get("enumNames", [])
+    return [
+        {"const": val, "title": enum_names[i] if i < len(enum_names) else str(val)}
+        for i, val in enumerate(prop_schema["enum"])
+    ]
+
+
+def _extract_any_of_options(any_of: list[Any]) -> list[form.QuestionOption]:
+    """Build options from an ``anyOf`` block (each entry has ``enum`` + ``title``)."""
+    options: list[form.QuestionOption] = []
+    for item in any_of:
+        if "enum" in item and "title" in item:
+            for val in item["enum"]:
+                options.append({"const": val, "title": item["title"]})
+    return options
+
+
 def _extract_options(
     prop_schema: dict[str, Any], schema: dict[str, Any]
 ) -> list[form.QuestionOption]:
-    """Extract QuestionOptions from oneOf, anyOf, or options entries."""
-    options: list[form.QuestionOption] = []
+    """Extract QuestionOptions from oneOf, anyOf, options, or enum entries."""
     if one_of := prop_schema.get("oneOf"):
-        options = [
+        return [
             {"const": item["const"], "title": item["title"]}
             for item in one_of
             if "const" in item and "title" in item
         ]
-    elif any_of := prop_schema.get("anyOf"):
-        for item in any_of:
-            if "enum" in item and "title" in item:
-                for val in item["enum"]:
-                    options.append({"const": val, "title": item["title"]})
-    elif raw_options := prop_schema.get("options"):
-        for item in raw_options:
-            if isinstance(item, (list, tuple)) and len(item) >= 2:
-                options.append({"const": item[0], "title": item[1]})
-    elif (items := prop_schema.get("items")) and isinstance(items, dict):
-        options = _extract_options(items, schema)
-    return options
+    if any_of := prop_schema.get("anyOf"):
+        return _extract_any_of_options(any_of)
+    if raw_options := prop_schema.get("options"):
+        return [
+            {"const": item[0], "title": item[1]}
+            for item in raw_options
+            if isinstance(item, (list, tuple)) and len(item) >= 2
+        ]
+    if "enum" in prop_schema:
+        return _extract_enum_options(prop_schema)
+    items = prop_schema.get("items")
+    if isinstance(items, dict):
+        return _extract_options(items, schema)
+    return []
 
 
 def _extract_condition(if_block: dict[str, Any]) -> list[form.Condition] | None:
@@ -229,6 +320,26 @@ def _parse_property(
         validator_path := prop_schema.get("validator")
     ) and prop_format not in _HIDDEN_FORMATS:
         validator = load_validator(validator_path)
+
+    if prop_format not in _HIDDEN_FORMATS:
+        keyword_validator = _build_keyword_validator(prop_schema)
+        if keyword_validator is not None:
+            if validator is not None:
+                # Compose: keyword constraints run first, then the explicit validator.
+                _explicit = validator
+                _kw_captured: form.AnswerValidator = keyword_validator
+
+                def _composed(
+                    value: str,
+                    _kw: form.AnswerValidator = _kw_captured,
+                    _ex: form.AnswerValidator = _explicit,
+                ) -> bool:
+                    _kw(value)
+                    return _ex(value)
+
+                validator = _composed
+            else:
+                validator = keyword_validator
 
     return question_class(
         key=key,

@@ -20,7 +20,7 @@ The table below summarises how a property's `type` and keywords determine the re
 |---|---|---|
 | `type: string` / `integer` / `number` | `Question` | Yes |
 | `type: boolean` | `QuestionBoolean` | Yes |
-| Any scalar type + `oneOf`, `anyOf`, or `options` | `QuestionChoice` | Yes |
+| Any scalar type + `oneOf`, `anyOf`, `options`, or `enum` | `QuestionChoice` | Yes |
 | `type: array` + `oneOf` or `anyOf` on `items` | `QuestionMultiple` | Yes |
 | `type: object` | *(subquestions)* | No—children are asked |
 | Any type + `format: constant` | `QuestionConstant` | No |
@@ -121,6 +121,53 @@ This is a compact alternative to `oneOf` that avoids the verbosity of full JSONS
 ```
 
 When `oneOf` or `anyOf` is also present, they take priority and `options` is ignored.
+
+### Using `enum`
+
+A bare `enum` array also produces a `QuestionChoice`.
+Because JSONSchema `enum` carries no separate labels, the raw values are used
+as titles by default.
+
+```json
+{
+  "properties": {
+    "stability": {
+      "type": "string",
+      "title": "Stability level",
+      "default": "beta",
+      "enum": ["alpha", "beta", "stable"]
+    }
+  }
+}
+```
+
+To provide human-readable labels, add the `enumNames` extension key.
+`enumNames` is not part of the JSONSchema standard, but is widely supported by
+form libraries including `react-jsonschema-form`.
+The list must be in the same order as `enum`; if it is shorter, the remaining
+entries fall back to the raw value.
+
+```json
+{
+  "properties": {
+    "stability": {
+      "type": "string",
+      "title": "Stability level",
+      "default": "beta",
+      "enum": ["alpha", "beta", "stable", "deprecated"],
+      "enumNames": [
+        "Alpha — experimental",
+        "Beta — mostly stable",
+        "Stable — production ready",
+        "Deprecated — no longer maintained"
+      ]
+    }
+  }
+}
+```
+
+Priority order when multiple keywords are present:
+`oneOf` > `anyOf` > `options` > `enum`.
 
 ---
 
@@ -242,6 +289,71 @@ The renderer will re-prompt if the user submits an empty value (`""`, `[]`, or n
 ```
 
 `site_id` and `admin_email` must receive a non-empty answer; `description` is optional.
+
+---
+
+## Constraint keywords
+
+TUI Forms enforces the following JSONSchema constraint keywords by attaching a
+built-in validator to the question.
+When the user's input violates a constraint, the renderer displays a specific
+error message and re-prompts.
+
+### String constraints
+
+| Keyword | Validates |
+|---|---|
+| `minLength` | Input has at least N characters. |
+| `maxLength` | Input has at most N characters. |
+| `pattern` | Input matches the regular expression (full match). |
+
+```json
+{
+  "properties": {
+    "slug": {
+      "type": "string",
+      "title": "Project slug",
+      "minLength": 3,
+      "maxLength": 40,
+      "pattern": "^[a-z0-9-]+$"
+    }
+  }
+}
+```
+
+### Numeric constraints
+
+| Keyword | Validates |
+|---|---|
+| `minimum` | Numeric value is ≥ the given number. |
+| `maximum` | Numeric value is ≤ the given number. |
+
+```json
+{
+  "properties": {
+    "port": {
+      "type": "integer",
+      "title": "HTTP port",
+      "minimum": 1024,
+      "maximum": 65535
+    }
+  }
+}
+```
+
+### Combining constraint keywords with a custom validator
+
+When a field has both constraint keywords and a `validator` key (or a
+format-based built-in validator), the constraints are checked first.
+If they pass, the explicit validator runs.
+This ensures schema-level guarantees are always enforced, regardless of what
+the custom validator checks.
+
+### Constraint keywords on hidden fields
+
+Constraint keywords (`minLength`, `maxLength`, `pattern`, `minimum`,
+`maximum`) are silently ignored on hidden fields (`format: constant` and
+`format: computed`).
 
 ---
 
@@ -466,3 +578,37 @@ TUI Forms renders it against the answers collected so far before presenting it t
 When the user answers `project_name` with `My Library`, the default for `repo_name` is pre-filled as `my-library`.
 
 Use `{{ root_key.answer_key }}` when you set a `root_key` on the form.
+
+---
+
+## Demo schema
+
+The `showcase` demo schema exercises every feature documented on this page.
+Run it with any renderer:
+
+```bash
+formdemo stdlib showcase
+formdemo rich showcase
+formdemo cookiecutter showcase
+```
+
+The schema is at `src/tui_forms/demo/showcase.json` in the repository.
+
+---
+
+## Unsupported keywords
+
+The table below lists JSONSchema keywords that TUI Forms knowingly ignores.
+Including them in a schema is not an error—they are simply not processed.
+
+| Keyword | Reason not supported |
+|---|---|
+| `additionalProperties` | TUI Forms generates output from declared `properties` only; there are no "additional" properties in the output, so this constraint is always satisfied by construction. |
+| `minItems` / `maxItems` | Array length constraints on multiple-choice questions are not yet enforced. |
+| `uniqueItems` | Duplicate selection is not yet prevented for multiple-choice questions. |
+| `exclusiveMinimum` / `exclusiveMaximum` | Use `minimum` / `maximum` instead (TUI Forms uses inclusive bounds). |
+| `multipleOf` | Not applicable to free-text TUI inputs. |
+| `if` / `then` at the property level | Only top-level `allOf` blocks with `if/then` pairs are supported. |
+| `not` | Negation logic is not supported. |
+| `patternProperties` | Dynamic property keys are not supported. |
+| `dependencies` / `dependentSchemas` | Use `allOf`/`if`/`then` for conditional questions instead. |
