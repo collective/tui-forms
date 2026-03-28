@@ -302,8 +302,9 @@ def test_one_of_takes_priority_over_enum():
 
 def test_showcase_schema_parses():
     """The bundled showcase.json demo schema should parse without errors."""
-    import json
     from pathlib import Path
+
+    import json
 
     schema_path = (
         Path(__file__).parent.parent.parent

@@ -53,17 +53,13 @@ def _data_url_validator(value: str) -> bool:
 def _check_min_length(value: str, limit: int) -> None:
     if len(value) < limit:
         plural = "s" if limit != 1 else ""
-        raise form.ValidationError(
-            f"Must be at least {limit} character{plural}."
-        )
+        raise form.ValidationError(f"Must be at least {limit} character{plural}.")
 
 
 def _check_max_length(value: str, limit: int) -> None:
     if len(value) > limit:
         plural = "s" if limit != 1 else ""
-        raise form.ValidationError(
-            f"Must be at most {limit} character{plural}."
-        )
+        raise form.ValidationError(f"Must be at most {limit} character{plural}.")
 
 
 def _check_pattern(value: str, pattern: str) -> None:

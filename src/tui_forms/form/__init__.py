@@ -1,7 +1,6 @@
 from tui_forms.form.form import Form
 from tui_forms.form.question import AnswerValidator
 from tui_forms.form.question import BaseQuestion
-from tui_forms.form.question import ValidationError
 from tui_forms.form.question import Condition
 from tui_forms.form.question import Question
 from tui_forms.form.question import QuestionBoolean
@@ -11,6 +10,7 @@ from tui_forms.form.question import QuestionConstant
 from tui_forms.form.question import QuestionHidden
 from tui_forms.form.question import QuestionMultiple
 from tui_forms.form.question import QuestionOption
+from tui_forms.form.question import ValidationError
 
 
 __all__ = [
