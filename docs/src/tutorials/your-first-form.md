@@ -141,6 +141,8 @@ python first_form.py
 
 You will see three prompts, one per question.
 Press **Enter** to accept the shown default, or type a new value.
+From the second question onward a hint tells you that typing `<` re-asks the
+previous question, so you can correct a mistake without restarting.
 After the last question the script prints the collected answers:
 
 ```

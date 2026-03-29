@@ -1,10 +1,15 @@
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import Callable
+from collections.abc import Iterator
 from jinja2 import Environment
 from tui_forms import form
 from tui_forms.utils.template import create_environment
 from typing import Any
+
+
+class _GoBackRequest(Exception):
+    """Raised by an _ask_* method to signal the user wants to go back."""
 
 
 class BaseRenderer(ABC):
@@ -21,6 +26,7 @@ class BaseRenderer(ABC):
     _user_provided: bool = True
     _form: form.Form
     _env: Environment
+    _BACK_COMMAND: str = "<"
 
     def __init__(
         self,
@@ -71,26 +77,64 @@ class BaseRenderer(ABC):
         """
         return f"[{current}/{total}] "
 
-    def _ask_questions(self, questions: list[form.BaseQuestion]) -> None:
-        """Recursively ask all visible, non-hidden questions.
+    def _back_hint(self) -> str:
+        """Return a hint string when going back is possible, or an empty string.
 
-        Object-type questions with subquestions are not asked directly;
-        their subquestions are asked instead.
+        :return: A hint such as ``"type < to go back"``, or ``""`` for the
+            first question.
+        """
+        if self._form.question_index > 1:
+            return f"type {self._BACK_COMMAND} to go back"
+        return ""
 
-        :param questions: The list of questions to process.
+    def _iter_active_leaves(
+        self, questions: list[form.BaseQuestion]
+    ) -> Iterator[form.BaseQuestion]:
+        """Yield active, visible leaf questions in order.
+
+        Object-type questions are not yielded; their subquestions are
+        traversed instead.  Inactive or hidden questions are skipped.
+
+        :param questions: The list of questions to traverse.
         """
         for question in questions:
             if question.hidden or not self._form.is_active(question):
                 continue
             if question.type == "object" and question.subquestions:
-                self._ask_questions(question.subquestions)
+                yield from self._iter_active_leaves(question.subquestions)
             else:
-                self._form.advance()
-                self._form.record(
-                    question.key,
-                    self._dispatch(question),
-                    user_provided=self._user_provided,
-                )
+                yield question
+
+    def _ask_questions(self, questions: list[form.BaseQuestion]) -> None:
+        """Ask all visible, non-hidden questions with back-navigation support.
+
+        Maintains a history stack so the user can type the back command to
+        re-answer a previous question.  Active questions are recomputed on
+        every iteration so conditional questions respond correctly when the
+        user changes a gating answer.
+
+        :param questions: The list of questions to process.
+        """
+        history: list[str] = []
+        while True:
+            answered = set(history)
+            next_q: form.BaseQuestion | None = None
+            for q in self._iter_active_leaves(questions):
+                if q.key not in answered:
+                    next_q = q
+                    break
+            if next_q is None:
+                break
+            self._form.set_question_index(len(history) + 1)
+            try:
+                answer = self._dispatch(next_q)
+            except _GoBackRequest:
+                if history:
+                    prev_key = history.pop()
+                    self._form.unrecord(prev_key)
+                continue
+            self._form.record(next_q.key, answer, user_provided=self._user_provided)
+            history.append(next_q.key)
 
     def _dispatch(self, question: form.BaseQuestion) -> Any:
         """Dispatch to the appropriate ask method based on question type.

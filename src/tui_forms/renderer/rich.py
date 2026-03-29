@@ -5,6 +5,7 @@ from rich.panel import Panel
 from rich.text import Text
 from tui_forms.form import BaseQuestion
 from tui_forms.form import Form
+from tui_forms.renderer.base import _GoBackRequest
 from tui_forms.renderer.base import BaseRenderer
 from typing import Any
 
@@ -107,12 +108,19 @@ class RichRenderer(BaseRenderer):
         :param default: The pre-computed default value.
         :param prefix: Progress prefix shown before the question title.
         :return: The user's answer, or the default if the input is empty.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         default_str = str(default) if default is not None else ""
-        hint = f" [dim][{default_str}][/]" if default_str else ""
-        prompt_row = Text.from_markup(f"[bold]Default[/]{hint}:")
-        self._show_panel(question, Text(""), prompt_row, prefix=prefix)
+        default_hint = f" [dim][{default_str}][/]" if default_str else ""
+        prompt_row = Text.from_markup(f"[bold]Default[/]{default_hint}:")
+        body_rows: list[Text] = [Text(""), prompt_row]
+        if back_hint := self._back_hint():
+            body_rows.append(Text.from_markup(f"[dim]{back_hint}[/]"))
+        self._show_panel(question, *body_rows, prefix=prefix)
         value = self._input_line()
+        if value == self._BACK_COMMAND:
+            self._close_panel()
+            raise _GoBackRequest()
         self._close_panel()
         return value if value else default_str
 
@@ -123,14 +131,21 @@ class RichRenderer(BaseRenderer):
         :param default: The pre-computed default value (True, False, or None).
         :param prefix: Progress prefix shown before the question title.
         :return: True or False.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         resolved_default = bool(default) if default is not None else False
-        hint = "[dim](Y/n)[/]" if resolved_default else "[dim](y/N)[/]"
-        prompt_row = Text.from_markup(f"[bold]Confirm[/] {hint}:")
-        self._show_panel(question, Text(""), prompt_row, prefix=prefix)
+        bool_hint = "[dim](Y/n)[/]" if resolved_default else "[dim](y/N)[/]"
+        prompt_row = Text.from_markup(f"[bold]Confirm[/] {bool_hint}:")
+        body_rows: list[Text] = [Text(""), prompt_row]
+        if back_hint := self._back_hint():
+            body_rows.append(Text.from_markup(f"[dim]{back_hint}[/]"))
+        self._show_panel(question, *body_rows, prefix=prefix)
         result = None
         while result is None:
             value = self._input_line()
+            if value == self._BACK_COMMAND:
+                self._close_panel()
+                raise _GoBackRequest()
             if not value:
                 result = resolved_default
             elif value.lower() in ("y", "yes"):
@@ -149,6 +164,7 @@ class RichRenderer(BaseRenderer):
         :param default: The pre-computed default const value.
         :param prefix: Progress prefix shown before the question title.
         :return: The const value of the selected option.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         options = question.options or []
         rows: list[Text] = []
@@ -164,9 +180,14 @@ class RichRenderer(BaseRenderer):
         choice_prompt = "[bold]Choice[/] [dim](number, or enter for default)[/]:"
         rows.append(Text(""))
         rows.append(Text.from_markup(choice_prompt))
+        if back_hint := self._back_hint():
+            rows.append(Text.from_markup(f"[dim]{back_hint}[/]"))
         self._show_panel(question, *rows, prefix=prefix)
         while True:
             value = self._input_line()
+            if value == self._BACK_COMMAND:
+                self._close_panel()
+                raise _GoBackRequest()
             if not value and default is not None:
                 self._close_panel()
                 return default
@@ -184,6 +205,7 @@ class RichRenderer(BaseRenderer):
         :param default: The pre-computed default list of const values.
         :param prefix: Progress prefix shown before the question title.
         :return: A list of const values for the selected options.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         options = question.options or []
         default_consts: list = default if isinstance(default, list) else []
@@ -200,9 +222,14 @@ class RichRenderer(BaseRenderer):
         selection_prompt = "[bold]Selection[/] [dim](numbers, or enter for default)[/]:"
         rows.append(Text(""))
         rows.append(Text.from_markup(selection_prompt))
+        if back_hint := self._back_hint():
+            rows.append(Text.from_markup(f"[dim]{back_hint}[/]"))
         self._show_panel(question, *rows, prefix=prefix)
         while True:
             value = self._input_line()
+            if value == self._BACK_COMMAND:
+                self._close_panel()
+                raise _GoBackRequest()
             if not value:
                 self._close_panel()
                 return default_consts
