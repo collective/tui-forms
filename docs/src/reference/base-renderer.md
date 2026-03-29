@@ -277,7 +277,7 @@ from tui_forms.renderer.base import _GoBackRequest
 
 A sentinel exception.
 Raise it from any `_ask_*` method when the user types the back command.
-Do not catch it—`_ask_questions` handles it automatically.
+Do not catch it, `_ask_questions` handles it automatically.
 
 ### `_BACK_COMMAND`
 
