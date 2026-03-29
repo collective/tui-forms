@@ -42,7 +42,7 @@ Use it as a starting point and replace the I/O logic with whatever library you p
 
 ```python
 from tui_forms.form import BaseQuestion
-from tui_forms.renderer.base import BaseRenderer
+from tui_forms.renderer.base import BaseRenderer, _GoBackRequest
 from typing import Any
 
 
@@ -51,28 +51,39 @@ class MyRenderer(BaseRenderer):
 
     name: str = "my_renderer"
 
-    def _validation_error(self, question: BaseQuestion) -> None:
-        print(f"  Invalid input for '{question.title}'. Please try again.")
+    def _validation_error(self, question: BaseQuestion, message: str | None) -> None:
+        if message:
+            print(f"  {message}")
+        else:
+            print(f"  Invalid input for '{question.title}'. Please try again.")
 
     def _ask_string(self, question: BaseQuestion, default: Any, prefix: str) -> str:
         print(f"\n{prefix}{question.title}")
         if question.description:
             print(f"  {question.description}")
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
         default_str = str(default) if default is not None else ""
         prompt = f"  [{default_str}] " if default_str else "  "
         value = input(prompt).strip()
+        if value == self._BACK_COMMAND:
+            raise _GoBackRequest()
         return value if value else default_str
 
     def _ask_boolean(self, question: BaseQuestion, default: Any, prefix: str) -> bool:
         print(f"\n{prefix}{question.title}")
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
         if default is True:
-            hint = "Y/n"
+            bool_hint = "Y/n"
         elif default is False:
-            hint = "y/N"
+            bool_hint = "y/N"
         else:
-            hint = "y/n"
+            bool_hint = "y/n"
         while True:
-            value = input(f"  [{hint}]: ").strip().lower()
+            value = input(f"  [{bool_hint}]: ").strip().lower()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value and default is not None:
                 return bool(default)
             if value in ("y", "yes"):
@@ -86,8 +97,12 @@ class MyRenderer(BaseRenderer):
         for i, opt in enumerate(options, 1):
             marker = ">" if opt["const"] == default else " "
             print(f"  {marker} {i}. {opt['title']}")
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
         while True:
             value = input("  Choice [number or enter for default]: ").strip()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value and default is not None:
                 return default
             if value.isdigit():
@@ -104,9 +119,13 @@ class MyRenderer(BaseRenderer):
         for i, opt in enumerate(options, 1):
             marker = "*" if opt["const"] in default_consts else " "
             print(f"  {marker} {i}. {opt['title']}")
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
         print("  Enter comma-separated numbers, or press enter to keep the default.")
         while True:
             value = input("  ").strip()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value:
                 return default_consts
             parts = [p.strip() for p in value.split(",") if p.strip()]
@@ -180,3 +199,18 @@ def _format_prefix(self, current: int, total: int) -> str:
 ```
 
 Return an empty string to suppress the prefix.
+
+## Support back navigation
+
+All built-in renderers let the user type `<` at any prompt to re-answer the
+previous question.
+If you want your renderer to support this too, follow the pattern shown in the
+example above:
+
+1. Call `self._back_hint()` and display its return value when it is non-empty.
+   It returns `""` for the first question, so no hint is shown there.
+2. After reading user input, compare the stripped value against
+   `self._BACK_COMMAND` and raise `_GoBackRequest()` when they match.
+   The pipeline catches the exception and re-asks the previous question.
+
+See {doc}`/reference/base-renderer` for the full contract.

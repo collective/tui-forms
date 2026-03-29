@@ -2,6 +2,7 @@ from rich.console import Console
 from rich.markup import escape
 from rich.text import Text
 from tui_forms.form import BaseQuestion
+from tui_forms.renderer.base import _GoBackRequest
 from tui_forms.renderer.base import BaseRenderer
 from typing import Any
 
@@ -65,10 +66,15 @@ class CookiecutterRenderer(BaseRenderer):
         :param default: The pre-computed default value.
         :param prefix: Progress prefix shown before the question title.
         :return: The user's answer, or the default if the input is empty.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         default_str = str(default) if default is not None else ""
         prompt = self._build_inline_prompt(question, default_str, prefix)
+        if back_hint := self._back_hint():
+            self._console.print(f"  [dim]({back_hint})[/]")
         value = self._console.input(prompt).strip()
+        if value == self._BACK_COMMAND:
+            raise _GoBackRequest()
         return value if value else default_str
 
     def _ask_boolean(self, question: BaseQuestion, default: Any, prefix: str) -> bool:
@@ -78,12 +84,17 @@ class CookiecutterRenderer(BaseRenderer):
         :param default: The pre-computed default value (True, False, or None).
         :param prefix: Progress prefix shown before the question title.
         :return: True or False.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         resolved = bool(default) if default is not None else False
         default_str = "Yes" if resolved else "No"
         prompt = self._build_inline_prompt(question, default_str, prefix)
+        if back_hint := self._back_hint():
+            self._console.print(f"  [dim]({back_hint})[/]")
         while True:
             value = self._console.input(prompt).strip().lower()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value:
                 return resolved
             if value in ("y", "yes"):
@@ -99,6 +110,7 @@ class CookiecutterRenderer(BaseRenderer):
         :param default: The pre-computed default const value.
         :param prefix: Progress prefix shown before the question title.
         :return: The const value of the selected option.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         options = question.options or []
         title_line = Text()
@@ -117,8 +129,12 @@ class CookiecutterRenderer(BaseRenderer):
         prompt.append(f"    Choose from [{choices_str}] ", style="dim")
         prompt.append(f"({default_idx})", style="dim")
         prompt.append(": ")
+        if back_hint := self._back_hint():
+            self._console.print(f"  [dim]({back_hint})[/]")
         while True:
             value = self._console.input(prompt).strip()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value and default is not None:
                 return default
             if value.isdigit():
@@ -136,6 +152,7 @@ class CookiecutterRenderer(BaseRenderer):
         :param default: The pre-computed default list of const values.
         :param prefix: Progress prefix shown before the question title.
         :return: A list of const values for the selected options.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         options = question.options or []
         default_consts: list = default if isinstance(default, list) else []
@@ -159,8 +176,12 @@ class CookiecutterRenderer(BaseRenderer):
         )
         prompt.append(f"({default_str})", style="dim")
         prompt.append(": ")
+        if back_hint := self._back_hint():
+            self._console.print(f"  [dim]({back_hint})[/]")
         while True:
             value = self._console.input(prompt).strip()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value:
                 return default_consts
             parts = [p.strip() for p in value.split(",") if p.strip()]

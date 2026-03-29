@@ -4,7 +4,7 @@ myst:
     "description": "API reference for BaseRenderer—the abstract base class that all TUI Forms renderer backends extend."
     "property=og:description": "API reference for BaseRenderer—the abstract base class that all TUI Forms renderer backends extend."
     "property=og:title": "BaseRenderer reference"
-    "keywords": "tui-forms, reference, BaseRenderer, API, renderer, abstract, _ask_string, _ask_boolean, _ask_choice, _ask_multiple"
+    "keywords": "tui-forms, reference, BaseRenderer, API, renderer, abstract, _ask_string, _ask_boolean, _ask_choice, _ask_multiple, back navigation, go back"
 ---
 
 # BaseRenderer
@@ -211,7 +211,7 @@ Called automatically by the rendering pipeline before re-prompting the question.
 
 ---
 
-## Overridable method
+## Overridable methods
 
 ### `_format_prefix`
 
@@ -230,6 +230,87 @@ Override this method to change the format or return `""` to suppress the prefix.
 | `total` | `int` | Total number of user-facing questions. |
 
 **Returns:** A `str` prefix, or `""` to show no prefix.
+
+---
+
+### `_back_hint`
+
+```python
+def _back_hint(self) -> str
+```
+
+Return a short hint string to display when going back is possible, or an empty
+string when the first question is being asked (there is nothing to go back to).
+
+The default implementation returns `"type < to go back"` when
+`form.question_index > 1`, and `""` otherwise.
+
+Override this method to change the hint text or suppress it by returning `""`.
+
+**Returns:** A hint `str`, or `""` for the first question.
+
+---
+
+## Back navigation
+
+All interactive `_ask_*` methods should support back navigation so that users
+can correct a previous answer.
+
+### How it works
+
+The rendering pipeline (`_ask_questions`) maintains a history stack of answered
+question keys.
+When an `_ask_*` method raises `_GoBackRequest`, the pipeline pops the most
+recent key from the history, removes the stored answer, and re-asks that question.
+This means:
+
+- Going back re-evaluates all conditions, so conditional questions that were
+  shown or hidden because of a gating answer respond correctly.
+- Going back on the very first question is a no-op (the history is empty, so
+  nothing is popped and the same question is re-asked).
+
+### `_GoBackRequest`
+
+```python
+from tui_forms.renderer.base import _GoBackRequest
+```
+
+A sentinel exception.
+Raise it from any `_ask_*` method when the user types the back command.
+Do not catch it, `_ask_questions` handles it automatically.
+
+### `_BACK_COMMAND`
+
+```python
+_BACK_COMMAND: str = "<"
+```
+
+The string the user must type to trigger back navigation.
+Compare stripped user input against `self._BACK_COMMAND` (do not hard-code `"<"`).
+Override the attribute to change the command.
+
+### Implementation pattern
+
+```python
+from tui_forms.renderer.base import BaseRenderer, _GoBackRequest
+
+class MyRenderer(BaseRenderer):
+    def _ask_string(self, question, default, prefix) -> str:
+        # 1. Show the prompt
+        print(f"\n{prefix}{question.title}")
+        # 2. Optionally display back hint
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
+        # 3. Read input
+        default_str = str(default) if default is not None else ""
+        value = input(f"  [{default_str}] " if default_str else "  ").strip()
+        # 4. Raise _GoBackRequest when the user types the back command
+        if value == self._BACK_COMMAND:
+            raise _GoBackRequest()
+        return value if value else default_str
+```
+
+Apply the same pattern in `_ask_boolean`, `_ask_choice`, and `_ask_multiple`.
 
 ---
 

@@ -1,4 +1,5 @@
 from tui_forms.form import BaseQuestion
+from tui_forms.renderer.base import _GoBackRequest
 from tui_forms.renderer.base import BaseRenderer
 from typing import Any
 
@@ -36,11 +37,16 @@ class StdlibRenderer(BaseRenderer):
         :param default: The pre-computed default value.
         :param prefix: Progress prefix shown before the question title.
         :return: The user's answer, or the default if the input is empty.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         self._print_header(question, prefix)
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
         default_str = str(default) if default is not None else ""
         prompt = f"  [{default_str}] " if default_str else "  "
         value = input(prompt).strip()
+        if value == self._BACK_COMMAND:
+            raise _GoBackRequest()
         return value if value else default_str
 
     def _ask_boolean(self, question: BaseQuestion, default: Any, prefix: str) -> bool:
@@ -50,16 +56,21 @@ class StdlibRenderer(BaseRenderer):
         :param default: The pre-computed default value (True, False, or None).
         :param prefix: Progress prefix shown before the question title.
         :return: True or False.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         self._print_header(question, prefix)
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
         if default is True:
-            hint = "Y/n"
+            bool_hint = "Y/n"
         elif default is False:
-            hint = "y/N"
+            bool_hint = "y/N"
         else:
-            hint = "y/n"
+            bool_hint = "y/n"
         while True:
-            value = input(f"  [{hint}]: ").strip().lower()
+            value = input(f"  [{bool_hint}]: ").strip().lower()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value and default is not None:
                 return bool(default)
             if value in ("y", "yes"):
@@ -78,14 +89,19 @@ class StdlibRenderer(BaseRenderer):
         :param default: The pre-computed default const value.
         :param prefix: Progress prefix shown before the question title.
         :return: The const value of the selected option.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         self._print_header(question, prefix)
         options = question.options or []
         for i, opt in enumerate(options, 1):
             marker = ">" if opt["const"] == default else " "
             print(f"  {marker} {i}. {opt['title']}")
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
         while True:
             value = input("  Choice [number or enter for default]: ").strip()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value and default is not None:
                 return default
             if value.isdigit():
@@ -105,6 +121,7 @@ class StdlibRenderer(BaseRenderer):
         :param default: The pre-computed default list of const values.
         :param prefix: Progress prefix shown before the question title.
         :return: A list of const values for the selected options.
+        :raises _GoBackRequest: When the user enters the back command.
         """
         self._print_header(question, prefix)
         options = question.options or []
@@ -112,9 +129,13 @@ class StdlibRenderer(BaseRenderer):
         for i, opt in enumerate(options, 1):
             marker = "*" if opt["const"] in default_consts else " "
             print(f"  {marker} {i}. {opt['title']}")
+        if back_hint := self._back_hint():
+            print(f"  ({back_hint})")
         print("  Enter comma-separated numbers, or press enter to keep default.")
         while True:
             value = input("  ").strip()
+            if value == self._BACK_COMMAND:
+                raise _GoBackRequest()
             if not value:
                 return default_consts
             parts = [p.strip() for p in value.split(",") if p.strip()]

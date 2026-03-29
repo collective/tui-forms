@@ -81,6 +81,24 @@ class Form:
         if user_provided:
             self._user_answers.add(key)
 
+    def set_question_index(self, n: int) -> None:
+        """Set the question index directly.
+
+        :param n: The new 1-based question index.
+        """
+        self._question_index = n
+
+    def unrecord(self, key: str) -> None:
+        """Remove an answer for the given question key.
+
+        :param key: The question key to remove.
+        """
+        answers = self.answers
+        if self.root_key:
+            answers = answers.get(self.root_key, {})
+        answers.pop(key, None)
+        self._user_answers.discard(key)
+
     def iter_all(self) -> Iterator[BaseQuestion]:
         """Yield every question and its subquestions depth-first.
 
