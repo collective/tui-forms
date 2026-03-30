@@ -4,7 +4,7 @@ myst:
     "description": "API reference for BaseRenderer—the abstract base class that all TUI Forms renderer backends extend."
     "property=og:description": "API reference for BaseRenderer—the abstract base class that all TUI Forms renderer backends extend."
     "property=og:title": "BaseRenderer reference"
-    "keywords": "tui-forms, reference, BaseRenderer, API, renderer, abstract, _ask_string, _ask_boolean, _ask_choice, _ask_multiple, back navigation, go back"
+    "keywords": "tui-forms, reference, BaseRenderer, API, renderer, abstract, _ask_string, _ask_boolean, _ask_choice, _ask_multiple, back navigation, go back, summary, confirm"
 ---
 
 # BaseRenderer
@@ -49,7 +49,12 @@ You do not normally call this directly—use {func}`tui_forms.create_renderer` i
 ### `render`
 
 ```python
-def render(self, initial_answers: dict[str, Any] | None = None) -> dict[str, Any]
+def render(
+    self,
+    initial_answers: dict[str, Any] | None = None,
+    *,
+    confirm: bool = False,
+) -> dict[str, Any]
 ```
 
 Run the form and return the collected answers.
@@ -57,6 +62,7 @@ Run the form and return the collected answers.
 | Parameter | Type | Description |
 |---|---|---|
 | `initial_answers` | `dict \| None` | Optional pre-populated answers that take priority over schema defaults. Pass the dict exactly as returned by a previous `render()` call (`root_key` nesting included, when applicable). When `None`, schema defaults are used for all questions. |
+| `confirm` | `bool` | When `True`, display a summary screen after all questions are answered and ask the user to confirm. If the user declines, the form restarts with the current answers pre-populated as defaults. Default: `False`. |
 
 Calls the abstract methods in order as the user progresses through the form.
 After all user-facing questions are answered, resolves hidden fields automatically.
@@ -212,6 +218,49 @@ Called automatically by the rendering pipeline before re-prompting the question.
 ---
 
 ## Overridable methods
+
+### `render_summary`
+
+```python
+def render_summary(self, user_answers: dict[str, Any]) -> bool
+```
+
+Display a summary of the user-provided answers and ask for confirmation.
+Called by `render()` when `confirm=True`.
+
+The default implementation prints a plain-text list to standard output and
+prompts the user to confirm (`y`) or restart (`n`).
+Pressing **Enter** without typing anything accepts the answers (default yes).
+Override this method in a subclass for a richer presentation (for example, a
+styled table).
+
+| Parameter | Type | Description |
+|---|---|---|
+| `user_answers` | `dict[str, Any]` | Answers actively provided by the user, as returned by `form.user_answers`. Does not include hidden computed fields. |
+
+**Returns:** `True` to proceed with the collected answers, `False` to restart
+the form with the current answers pre-populated as defaults.
+
+The base implementation uses two helper methods you can also call in your own override:
+
+- `_question_for_key(key)`: returns the `BaseQuestion` for a given key, or `None`.
+- `_summary_display_value(question, value)`: formats a value for display.
+  Boolean values become `"Yes"` or `"No"`, choice and multiple-choice values are
+  resolved to their option titles, and all other values are converted with `str()`.
+
+```python
+# Minimal override example
+def render_summary(self, user_answers: dict[str, Any]) -> bool:
+    print("\nYour answers:")
+    for key, value in user_answers.items():
+        question = self._question_for_key(key)
+        title = question.title if question else key
+        display = self._summary_display_value(question, value)
+        print(f"  {title}: {display}")
+    return input("\nProceed? [Y/n]: ").strip().lower() in ("", "y", "yes")
+```
+
+---
 
 ### `_format_prefix`
 

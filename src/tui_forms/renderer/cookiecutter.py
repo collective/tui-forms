@@ -46,6 +46,28 @@ class CookiecutterRenderer(BaseRenderer):
         t.append(": ")
         return t
 
+    def render_summary(self, user_answers: dict[str, Any]) -> bool:
+        """Display a cookiecutter-style summary and ask for confirmation.
+
+        :param user_answers: Answers actively provided by the user.
+        :return: ``True`` to proceed, ``False`` to restart.
+        """
+        self._console.print()
+        self._console.print("  [bold cyan]Review your answers[/]")
+        for key, value in user_answers.items():
+            question = self._question_for_key(key)
+            title = question.title if question else key
+            display = self._summary_display_value(question, value)
+            self._console.print(f"  {escape(title)}: [bold]{escape(str(display))}[/]")
+        self._console.print()
+        while True:
+            value = self._console.input("  Proceed? [Y/n]: ").strip().lower()
+            if not value or value in ("y", "yes"):
+                return True
+            if value in ("n", "no"):
+                return False
+            self._console.print("  [red]Please enter y or n.[/]")
+
     def _validation_error(self, question: BaseQuestion, message: str | None) -> None:
         """Print an error when the validator rejects the user's answer.
 

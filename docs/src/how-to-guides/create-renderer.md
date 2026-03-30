@@ -135,6 +135,45 @@ class MyRenderer(BaseRenderer):
                 return [options[int(p) - 1]["const"] for p in parts]
 ```
 
+## Add a summary/confirmation screen
+
+When users call `renderer.render(confirm=True)`, the pipeline calls
+`render_summary(user_answers)` after all questions are answered.
+The default implementation (inherited from `BaseRenderer`) prints a plain-text
+list and prompts for confirmation.
+
+Override `render_summary` in your subclass to provide a richer presentation:
+
+```python
+from typing import Any
+
+class MyRenderer(BaseRenderer):
+    ...
+
+    def render_summary(self, user_answers: dict[str, Any]) -> bool:
+        print("\n=== Review your answers ===")
+        for key, value in user_answers.items():
+            question = self._question_for_key(key)
+            title = question.title if question else key
+            display = self._summary_display_value(question, value)
+            print(f"  {title}: {display}")
+        print()
+        while True:
+            response = input("Confirm? [Y/n]: ").strip().lower()
+            if not response or response in ("y", "yes"):
+                return True
+            if response in ("n", "no"):
+                return False
+            print("  Please enter y or n.")
+```
+
+Return `True` to accept the answers and let `render()` return them.
+Return `False` to restart the form; the current answers become the defaults so
+the user can change only what they want.
+
+If you do not need a summary screen, you can skip this step—the default
+implementation in `BaseRenderer` is already functional.
+
 ## Register the renderer as an entry point
 
 TUI Forms discovers renderers through Python {term}`entry point`s in the `tui_forms.renderers` group.
