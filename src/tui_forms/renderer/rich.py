@@ -2,6 +2,7 @@ from rich import box
 from rich.console import Console
 from rich.console import Group
 from rich.panel import Panel
+from rich.table import Table
 from rich.text import Text
 from tui_forms.form import BaseQuestion
 from tui_forms.form import Form
@@ -111,7 +112,8 @@ class RichRenderer(BaseRenderer):
         :raises _GoBackRequest: When the user enters the back command.
         """
         default_str = str(default) if default is not None else ""
-        default_hint = f" [dim][{default_str}][/]" if default_str else ""
+        escaped = default_str.replace("[", "\\[") if default_str else ""
+        default_hint = f" [dim]\\[{escaped}][/]" if escaped else ""
         prompt_row = Text.from_markup(f"[bold]Default[/]{default_hint}:")
         body_rows: list[Text] = [Text(""), prompt_row]
         if back_hint := self._back_hint():
@@ -198,6 +200,32 @@ class RichRenderer(BaseRenderer):
                     return options[idx]["const"]
             self._error_line("Invalid choice. Please enter a valid number.")
 
+    def render_summary(self, user_answers: dict[str, Any]) -> bool:
+        """Display a Rich-styled summary table and ask for confirmation.
+
+        :param user_answers: Answers actively provided by the user.
+        :return: ``True`` to proceed, ``False`` to restart.
+        """
+        table = Table(show_header=False, box=box.SIMPLE, padding=(0, 1))
+        table.add_column("Question", style="bold")
+        table.add_column("Answer")
+        for key, value in user_answers.items():
+            question = self._question_for_key(key)
+            title = question.title if question else key
+            display = self._summary_display_value(question, value)
+            table.add_row(title, display)
+        self._console.print()
+        self._console.print(
+            Panel(table, title="Review your answers", title_align="left")
+        )
+        while True:
+            value = self._console.input("\nProceed? [Y/n]: ").strip().lower()
+            if not value or value in ("y", "yes"):
+                return True
+            if value in ("n", "no"):
+                return False
+            self._console.print("[red]Please enter y or n.[/]")
+
     def _ask_multiple(self, question: BaseQuestion, default: Any, prefix: str) -> list:
         """Ask a multiple-choice question with options listed inside the panel.
 
@@ -219,7 +247,10 @@ class RichRenderer(BaseRenderer):
                 )
             else:
                 rows.append(Text.from_markup(f"  [cyan]{i}[/]. {opt['title']}"))
-        selection_prompt = "[bold]Selection[/] [dim](numbers, or enter for default)[/]:"
+        selection_prompt = (
+            "[bold]Selection[/]"
+            " [dim](comma-separated numbers, or enter for default)[/]:"
+        )
         rows.append(Text(""))
         rows.append(Text.from_markup(selection_prompt))
         if back_hint := self._back_hint():

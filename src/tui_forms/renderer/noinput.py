@@ -18,15 +18,34 @@ class NoInputRenderer(BaseRenderer):
     name: str = "noinput"
     _user_provided: bool = False
 
-    def render(self, initial_answers: dict[str, Any] | None = None) -> dict[str, Any]:
+    def render(
+        self,
+        initial_answers: dict[str, Any] | None = None,
+        *,
+        confirm: bool = False,
+    ) -> dict[str, Any]:
         """Process the form using pre-populated answers and return the result.
+
+        The *confirm* parameter is accepted for API compatibility but has no
+        effect: ``NoInputRenderer`` is non-interactive and never shows a
+        summary screen.
 
         :param initial_answers: Answers from a previous render() call.
             These are seeded into the form before questions are processed,
             so they take priority over schema defaults.
+        :param confirm: Ignored.  ``NoInputRenderer`` always proceeds without
+            confirmation.
         :return: A flat dict mapping each question key to its answer.
         """
-        return super().render(initial_answers)
+        return super().render(initial_answers, confirm=confirm)
+
+    def render_summary(self, user_answers: dict[str, Any]) -> bool:
+        """Always return ``True``; no summary is shown in non-interactive mode.
+
+        :param user_answers: Unused.
+        :return: Always ``True``.
+        """
+        return True
 
     def _dispatch(self, question: form.BaseQuestion) -> Any:
         """Dispatch to the appropriate ask method and raise on validation failure.

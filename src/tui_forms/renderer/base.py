@@ -43,27 +43,108 @@ class BaseRenderer(ABC):
         self._form = frm
         self._env: Environment = create_environment(config, extensions=extensions)
 
-    def render(self, initial_answers: dict[str, Any] | None = None) -> dict[str, Any]:
+    def render(
+        self,
+        initial_answers: dict[str, Any] | None = None,
+        *,
+        confirm: bool = False,
+    ) -> dict[str, Any]:
         """Render the form and return the collected answers.
+
+        When *confirm* is ``True``, :meth:`render_summary` is called after all
+        questions are answered.  If the user declines to proceed, the form
+        restarts with the previous answers pre-populated as defaults.
 
         :param initial_answers: Optional pre-populated answers that take priority
             over schema defaults. Pass the dict exactly as returned by a previous
             ``render()`` call (root_key nesting included, when applicable).
+        :param confirm: When ``True``, display a summary screen after all
+            questions are answered and ask the user to confirm before returning.
         :return: A flat dict mapping each question key to its answer.
         """
-        self._form.start()
-        if initial_answers:
-            self._form.answers.update(initial_answers)
-        self._ask_questions(self._form.questions)
+        current_initial = initial_answers
+        while True:
+            self._form.start()
+            if current_initial:
+                self._form.answers.update(current_initial)
+            self._ask_questions(self._form.questions)
+            for question in self._form.iter_all():
+                if question.hidden and self._form.is_active(question):
+                    self._form.record(
+                        question.key,
+                        question.default_value(
+                            self._env, self._form.answers, self._form.root_key
+                        ),
+                    )
+            answers = dict(self._form.answers)
+            if not confirm or self.render_summary(self._form.user_answers):
+                return answers
+            current_initial = answers
+
+    def render_summary(self, user_answers: dict[str, Any]) -> bool:
+        """Display a summary of user-provided answers and ask for confirmation.
+
+        Called by :meth:`render` when *confirm* is ``True``.  The default
+        implementation prints a plain-text list and prompts the user to
+        confirm or restart.  Override in a subclass for a richer presentation.
+
+        :param user_answers: Answers actively provided by the user (as returned
+            by ``form.user_answers``).
+        :return: ``True`` to proceed with the collected answers, ``False`` to
+            restart the form with the current answers pre-populated as defaults.
+        """
+        print("\nReview your answers:\n")
+        for key, value in user_answers.items():
+            question = self._question_for_key(key)
+            title = question.title if question else key
+            display = self._summary_display_value(question, value)
+            print(f"  {title}: {display}")
+        print()
+        while True:
+            response = input("Proceed? [Y/n]: ").strip().lower()
+            if not response or response in ("y", "yes"):
+                return True
+            if response in ("n", "no"):
+                return False
+            print("  Please enter y or n.")
+
+    def _question_for_key(self, key: str) -> form.BaseQuestion | None:
+        """Return the question with the given key, or ``None`` if not found.
+
+        :param key: The question key to look up.
+        :return: The matching ``BaseQuestion``, or ``None``.
+        """
         for question in self._form.iter_all():
-            if question.hidden and self._form.is_active(question):
-                self._form.record(
-                    question.key,
-                    question.default_value(
-                        self._env, self._form.answers, self._form.root_key
-                    ),
-                )
-        return dict(self._form.answers)
+            if question.key == key:
+                return question
+        return None
+
+    def _summary_display_value(
+        self, question: form.BaseQuestion | None, value: Any
+    ) -> str:
+        """Return a human-readable string representation of *value* for the summary.
+
+        Booleans are shown as ``Yes`` or ``No``.  Choice and multiple-choice
+        values are resolved to their option titles.  All other values are
+        converted with ``str()``.
+
+        :param question: The question the value belongs to, or ``None``.
+        :param value: The answer value to format.
+        :return: A display string suitable for a summary row.
+        """
+        if question is None:
+            return str(value) if value is not None else ""
+        if isinstance(question, form.QuestionBoolean):
+            return "Yes" if value else "No"
+        if (
+            isinstance(question, (form.QuestionChoice, form.QuestionMultiple))
+            and question.options
+        ):
+            options_map = {opt["const"]: opt["title"] for opt in question.options}
+            if isinstance(value, list):
+                return ", ".join(options_map.get(v, str(v)) for v in value)
+            return options_map.get(value, str(value))
+        return str(value) if value is not None else ""
 
     def _format_prefix(self, current: int, total: int) -> str:
         """Return the prefix string shown before each question title.

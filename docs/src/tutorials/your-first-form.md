@@ -163,5 +163,6 @@ After the last question the script prints the collected answers:
 
 - Store the schema in a JSON file and load it with `json.loads(Path("form.json").read_text())`.
 - Try the `rich` renderer for styled prompts: `create_renderer("rich", schema)` (requires `pip install "tui-forms[rich]"`).
+- Pass `confirm=True` to `render()` to show a summary screen after the last question, letting the user review and confirm (or restart with their previous answers as defaults): `renderer.render(confirm=True)`.
 - {doc}`conditional-questions`: show extra questions only when a previous answer matches a specific value.
 - {doc}`/reference/jsonschema-support`: full reference for all supported schema constructs.
