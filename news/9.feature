@@ -1,1 +1,0 @@
-Added a summary/confirmation screen to the form wizard. Pass `confirm=True` to `render()` to display answers before finishing; the user can confirm or restart with prior answers pre-populated. @ericof

@@ -1,1 +1,0 @@
-Added `required: bool = False` to `BaseQuestion`; `jsonschema_to_form` now reads the schema's `required` array and sets the flag on each question. `_dispatch()` re-prompts (or raises `ValueError` in `NoInputRenderer`) when a required field is left empty. @ericof

@@ -1,1 +1,0 @@
-Fixed ``NoInputRenderer`` infinite loop: when a default value fails validation, a ``ValueError`` is now raised immediately instead of looping forever. @ericof

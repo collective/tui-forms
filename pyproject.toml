@@ -1,6 +1,6 @@
 [project]
 name = "tui-forms"
-version = "1.0.0a2.dev0"
+version = "1.0.0a2"
 description = "Schema-driven form wizards for the terminal."
 readme = "README.md"
 license = "MIT"

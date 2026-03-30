@@ -1,1 +1,0 @@
-Updated ``noinput`` renderer reference to document that a ``ValueError`` is raised when a default value fails validation. @ericof

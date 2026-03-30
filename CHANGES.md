@@ -9,6 +9,31 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.0a2 (2026-03-30)
+
+
+### New features:
+
+- String fields now support `minLength`, `maxLength`, `pattern`, `minimum`, and `maximum` JSONSchema keywords; these constraints are enforced during rendering with clear validation error messages. @ericof [#8](https://github.com/collective/tui-forms/issues/8)
+- Added a summary/confirmation screen to the form wizard. Pass `confirm=True` to `render()` to display answers before finishing; the user can confirm or restart with prior answers pre-populated. @ericof [#9](https://github.com/collective/tui-forms/issues/9)
+- Added back-navigation support to all renderers: typing `<` at any prompt re-asks the previous question, with a hint displayed when going back is available. @ericof [#10](https://github.com/collective/tui-forms/issues/10)
+
+
+### Bug fixes:
+
+- Fixed ``NoInputRenderer`` infinite loop: when a default value fails validation, a ``ValueError`` is now raised immediately instead of looping forever. @ericof [#1](https://github.com/collective/tui-forms/issues/1)
+- Added `ValidationError` exception class so validators can surface a specific error message; `_dispatch()` now catches it and forwards the message to `_validation_error()`. `NoInputRenderer` raises `ValueError` with the message included instead of silently looping. @ericof [#2](https://github.com/collective/tui-forms/issues/2)
+- ``StdlibRenderer`` and ``CookiecutterRenderer`` now display an error message when the user enters invalid input for boolean, choice, and multiple questions, instead of silently re-prompting. @ericof [#3](https://github.com/collective/tui-forms/issues/3)
+- ``$ref`` resolution now raises ``ValueError`` with the full reference path when a segment is missing, instead of a bare ``KeyError``. @ericof [#5](https://github.com/collective/tui-forms/issues/5)
+- Added `required: bool = False` to `BaseQuestion`; `jsonschema_to_form` now reads the schema's `required` array and sets the flag on each question. `_dispatch()` re-prompts (or raises `ValueError` in `NoInputRenderer`) when a required field is left empty. @ericof [#6](https://github.com/collective/tui-forms/issues/6)
+- `_extract_condition` now collects all property conditions from `if` blocks instead of stopping at the first one; `Form.is_active` evaluates them with AND logic so a question is only shown when every condition is met. @ericof [#7](https://github.com/collective/tui-forms/issues/7)
+
+
+### Documentation:
+
+- Updated ``noinput`` renderer reference to document that a ``ValueError`` is raised when a default value fails validation. @ericof [#1](https://github.com/collective/tui-forms/issues/1)
+- Updated ``stdlib`` and ``cookiecutter`` renderer references to document the invalid input format error messages. @ericof [#3](https://github.com/collective/tui-forms/issues/3)
+
 ## 1.0.0a1 (2026-03-12)
 
 

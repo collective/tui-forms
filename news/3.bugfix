@@ -1,1 +1,0 @@
-``StdlibRenderer`` and ``CookiecutterRenderer`` now display an error message when the user enters invalid input for boolean, choice, and multiple questions, instead of silently re-prompting. @ericof
