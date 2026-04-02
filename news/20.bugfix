@@ -1,1 +1,0 @@
-Fixed parser ignoring top-level allOf/if/then conditional questions in jsonschema_to_form. @ericof

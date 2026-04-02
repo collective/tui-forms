@@ -9,6 +9,20 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.0a4 (2026-04-02)
+
+
+### New features:
+
+- Added pytest plugin with make_questions, make_form, render_form, and render_form_capture_input fixtures for downstream packages to test their wizard implementations. Install with tui-forms[test]. @ericof [#19](https://github.com/collective/tui-forms/issues/19)
+
+
+### Bug fixes:
+
+- Fixed computed field filtering on review-retry when root_key is set; stale computed values no longer leak through because the filter now operates on the inner dict. @ericof [#17](https://github.com/collective/tui-forms/issues/17)
+- Fixed parser ignoring top-level allOf/if/then conditional questions in jsonschema_to_form. @ericof [#20](https://github.com/collective/tui-forms/issues/20)
+- Fixed conditional questions from allOf/if/then being placed after all properties instead of right after their gating question. @ericof [#21](https://github.com/collective/tui-forms/issues/21)
+
 ## 1.0.0a3 (2026-04-02)
 
 
