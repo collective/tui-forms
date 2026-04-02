@@ -9,6 +9,14 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.0a3 (2026-04-02)
+
+
+### Bug fixes:
+
+- Fixed go-back losing user-entered values and reverting to schema defaults. @ericof [#16](https://github.com/collective/tui-forms/issues/16)
+- Fixed computed fields not being recalculated after review retry. @ericof [#17](https://github.com/collective/tui-forms/issues/17)
+
 ## 1.0.0a2 (2026-03-30)
 
 
