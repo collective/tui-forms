@@ -231,13 +231,34 @@ def _select_question_class(
     return form.Question
 
 
+def _find_insert_index(subquestions: list[form.BaseQuestion], gating_key: str) -> int:
+    """Return the index right after the gating question, or len(subquestions).
+
+    When multiple conditional blocks share the same gating key, each batch
+    is inserted after the previous one, preserving allOf declaration order.
+
+    :param subquestions: The current list of questions.
+    :param gating_key: The key of the question that gates the conditional.
+    :return: The insertion index.
+    """
+    last_index = len(subquestions)
+    for i, q in enumerate(subquestions):
+        if q.key == gating_key:
+            last_index = i + 1
+    # Also skip past any conditionals already inserted for this gating key.
+    while last_index < len(subquestions) and subquestions[last_index].condition:
+        last_index += 1
+    return last_index
+
+
 def _build_subquestions(
     prop_schema: dict[str, Any], schema: dict[str, Any]
 ) -> list[form.BaseQuestion]:
     """Build subquestions for an object-type property.
 
-    Collects direct property subquestions, then appends conditional
-    subquestions from allOf/if/then blocks, skipping duplicate keys.
+    Collects direct property subquestions, then inserts conditional
+    subquestions from allOf/if/then blocks right after their gating
+    question, skipping duplicate keys.
     """
     subquestions: list[form.BaseQuestion] = []
     seen_keys: set[str] = set()
@@ -259,6 +280,8 @@ def _build_subquestions(
             then = _resolve_ref(schema, then["$ref"])
         question_condition = _extract_condition(allof_item.get("if", {}))
         then_required: list[str] = then.get("required", [])
+        gating_key = question_condition[0]["key"] if question_condition else ""
+        insert_at = _find_insert_index(subquestions, gating_key)
         for sub_key, sub_prop in then.get("properties", {}).items():
             if sub_key not in seen_keys:
                 sq = _parse_property(
@@ -268,7 +291,8 @@ def _build_subquestions(
                     condition=question_condition,
                     required=sub_key in then_required,
                 )
-                subquestions.append(sq)
+                subquestions.insert(insert_at, sq)
+                insert_at += 1
                 seen_keys.add(sub_key)
 
     return subquestions

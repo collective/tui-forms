@@ -5,7 +5,6 @@ is the simplest to patch) and verify that the base-class logic in
 ``_ask_questions`` and ``_dispatch`` handles all edge cases correctly.
 """
 
-from tui_forms import form
 from tui_forms.renderer.stdlib import StdlibRenderer
 from unittest.mock import patch
 
@@ -132,51 +131,40 @@ def test_back_from_multiple_rerenders_previous_string(make_form, render_stdlib):
 # ---------------------------------------------------------------------------
 
 
-# Note: these tests require oidc_url between provider and name, which can't be
-# expressed in schema form (allOf questions always follow properties). Direct
-# Form construction preserves the exact question ordering needed.
+_CONDITIONAL_SCHEMA = {
+    "properties": {
+        "provider": {
+            "type": "string",
+            "title": "Provider",
+            "default": "local",
+            "oneOf": [
+                {"const": "local", "title": "Local"},
+                {"const": "oidc", "title": "OIDC"},
+            ],
+        },
+        "name": {"type": "string", "title": "Name", "default": ""},
+    },
+    "allOf": [
+        {
+            "if": {"properties": {"provider": {"const": "oidc"}}},
+            "then": {
+                "properties": {
+                    "oidc_url": {
+                        "type": "string",
+                        "title": "OIDC URL",
+                        "default": "",
+                    }
+                }
+            },
+        }
+    ],
+}
 
 
-def _conditional_form() -> form.Form:
-    """Build a form with a conditional question between two regular questions."""
-    return form.Form(
-        title="Test",
-        description="",
-        questions=[
-            form.QuestionChoice(
-                key="provider",
-                type="string",
-                title="Provider",
-                description="",
-                default="local",
-                options=[
-                    {"const": "local", "title": "Local"},
-                    {"const": "oidc", "title": "OIDC"},
-                ],
-            ),
-            form.Question(
-                key="oidc_url",
-                type="string",
-                title="OIDC URL",
-                description="",
-                default="",
-                condition=[{"key": "provider", "value": "oidc"}],
-            ),
-            form.Question(
-                key="name",
-                type="string",
-                title="Name",
-                description="",
-                default="",
-            ),
-        ],
-    )
-
-
-def test_back_past_gating_question_hides_conditional(render_stdlib):
+def test_back_past_gating_question_hides_conditional(make_form, render_stdlib):
     """Going back twice from ``name`` through ``oidc_url`` to ``provider`` should hide
     the conditional question when a non-triggering value is re-selected."""
-    frm = _conditional_form()
+    frm = make_form(_CONDITIONAL_SCHEMA)
     # Choose "oidc" → answer oidc_url → answer name → go back to name's predecessor
     # (oidc_url) → go back again to provider → choose "local"
     # → oidc_url should be skipped → answer name
@@ -186,10 +174,12 @@ def test_back_past_gating_question_hides_conditional(render_stdlib):
     assert result["name"] == "Alice"
 
 
-def test_back_past_gating_question_shows_conditional_on_reselect(render_stdlib):
+def test_back_past_gating_question_shows_conditional_on_reselect(
+    make_form, render_stdlib
+):
     """Going back from a non-conditional question to the gating question and
     re-selecting the triggering value should re-ask the conditional question."""
-    frm = _conditional_form()
+    frm = make_form(_CONDITIONAL_SCHEMA)
     # Choose "local" (oidc_url skipped) → answer name → go back to provider
     # (history only has "provider") → choose "oidc" → answer oidc_url → answer name
     result = render_stdlib(frm, ["1", "<", "2", "https://oidc.example.com", "Alice"])

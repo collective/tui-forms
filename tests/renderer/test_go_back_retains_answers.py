@@ -7,8 +7,6 @@ See: https://github.com/collective/tui-forms/issues/16
      https://github.com/plone/cookieplone/issues/159
 """
 
-from tui_forms import form
-
 
 def test_go_back_shows_previous_answer_as_default(
     make_form, render_stdlib_capture_input
@@ -138,43 +136,37 @@ def test_go_back_retains_multiple_values(make_form, render_stdlib):
     assert result["name"] == "Alice"
 
 
-def test_go_back_retains_answer_for_conditional_evaluation(render_stdlib):
+def test_go_back_retains_answer_for_conditional_evaluation(make_form, render_stdlib):
     """The gating answer should remain so conditional questions stay visible
     after going back and re-accepting the same gating value."""
-    # Note: requires oidc_url between provider and name, which can't be
-    # expressed in schema form (allOf questions always follow properties).
-    frm = form.Form(
-        title="Test",
-        description="",
-        questions=[
-            form.QuestionChoice(
-                key="provider",
-                type="string",
-                title="Provider",
-                description="",
-                default="local",
-                options=[
+    frm = make_form({
+        "properties": {
+            "provider": {
+                "type": "string",
+                "title": "Provider",
+                "default": "local",
+                "oneOf": [
                     {"const": "local", "title": "Local"},
                     {"const": "oidc", "title": "OIDC"},
                 ],
-            ),
-            form.Question(
-                key="oidc_url",
-                type="string",
-                title="OIDC URL",
-                description="",
-                default="",
-                condition=[{"key": "provider", "value": "oidc"}],
-            ),
-            form.Question(
-                key="name",
-                type="string",
-                title="Name",
-                description="",
-                default="",
-            ),
+            },
+            "name": {"type": "string", "title": "Name", "default": ""},
+        },
+        "allOf": [
+            {
+                "if": {"properties": {"provider": {"const": "oidc"}}},
+                "then": {
+                    "properties": {
+                        "oidc_url": {
+                            "type": "string",
+                            "title": "OIDC URL",
+                            "default": "",
+                        }
+                    }
+                },
+            }
         ],
-    )
+    })
     # Choose "oidc" (2), answer url, go back to url, press Enter (keep url),
     # answer name
     result = render_stdlib(frm, ["2", "https://id.example.com", "<", "", "Alice"])

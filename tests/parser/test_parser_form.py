@@ -325,6 +325,55 @@ def test_top_level_allof_required_propagated(ifthen_form):
     assert water.required is True
 
 
+# --- Conditional question ordering tests (issue #21) ---
+
+
+def test_conditional_questions_placed_after_gating_question(ifthen_form):
+    """Conditional questions should appear right after their gating question."""
+    keys = [q.key for q in ifthen_form.questions]
+    # animal is the gating question; food and water should follow it
+    assert keys == ["animal", "food", "water"]
+
+
+def test_conditional_subquestions_placed_after_gating_in_object():
+    """Inside an object, conditional subquestions should follow their gate."""
+    schema = {
+        "properties": {
+            "wrapper": {
+                "type": "object",
+                "properties": {
+                    "mode": {
+                        "type": "string",
+                        "default": "a",
+                        "oneOf": [
+                            {"const": "a", "title": "A"},
+                            {"const": "b", "title": "B"},
+                        ],
+                    },
+                    "name": {"type": "string", "default": ""},
+                },
+                "allOf": [
+                    {
+                        "if": {"properties": {"mode": {"const": "b"}}},
+                        "then": {
+                            "properties": {
+                                "detail": {
+                                    "type": "string",
+                                    "default": "",
+                                }
+                            }
+                        },
+                    }
+                ],
+            }
+        }
+    }
+    frm = jsonschema_to_form(schema)
+    wrapper = _question(frm, "wrapper")
+    keys = [q.key for q in wrapper.subquestions]
+    assert keys == ["mode", "detail", "name"]
+
+
 # --- Required field tests ---
 
 
