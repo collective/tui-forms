@@ -282,6 +282,49 @@ def test_conditional_subquestion_condition(plone_form, key, expected_condition):
     assert sq.condition == expected_condition
 
 
+# --- Top-level allOf/if/then tests (issue #20) ---
+
+
+@pytest.fixture(scope="module")
+def ifthen_form(load_schema):
+    """Parse the rjsf-if-then-else schema into a Form instance."""
+    return jsonschema_to_form(load_schema("rjsf-if-then-else.json"))
+
+
+def test_top_level_allof_creates_conditional_questions(ifthen_form):
+    """Top-level allOf/if/then should produce conditional questions."""
+    keys = {q.key for q in ifthen_form.questions}
+    assert "food" in keys
+    assert "water" in keys
+
+
+@pytest.mark.parametrize(
+    "key,expected_condition",
+    [
+        ("food", [{"key": "animal", "value": "Cat"}]),
+        ("water", [{"key": "animal", "value": "Fish"}]),
+    ],
+)
+def test_top_level_allof_condition_values(ifthen_form, key, expected_condition):
+    """Conditional questions from top-level allOf should carry the correct condition."""
+    q = _question(ifthen_form, key)
+    assert q.condition == expected_condition
+
+
+def test_top_level_allof_unconditional_question(ifthen_form):
+    """The non-conditional question should have no condition."""
+    q = _question(ifthen_form, "animal")
+    assert q.condition is None
+
+
+def test_top_level_allof_required_propagated(ifthen_form):
+    """Required keys from then blocks should propagate to the question."""
+    food = _question(ifthen_form, "food")
+    water = _question(ifthen_form, "water")
+    assert food.required is True
+    assert water.required is True
+
+
 # --- Required field tests ---
 
 

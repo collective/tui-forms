@@ -367,11 +367,7 @@ def jsonschema_to_form(schema: dict[str, Any], root_key: str = "") -> form.Form:
     jsonschema.validate(schema, _FORM_SCHEMA)
     title = schema.get("title", "")
     description = schema.get("description", "")
-    required_keys: list[str] = schema.get("required", [])
-    questions = [
-        _parse_property(key, prop_schema, schema, required=key in required_keys)
-        for key, prop_schema in schema.get("properties", {}).items()
-    ]
+    questions = _build_subquestions(schema, schema)
     return form.Form(
         title=title, description=description, questions=questions, root_key=root_key
     )

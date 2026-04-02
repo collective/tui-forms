@@ -248,108 +248,105 @@ def test_hidden_questions_not_in_user_inputs(make_form, render):
 
 
 # --- Condition tests ---
-# Note: conditions use direct Form construction because the parser does not yet
-# support top-level allOf/if/then (see issue #20).
 
 
-def _conditional_form() -> form.Form:
-    """Build a form with a conditional question for condition tests."""
-    return form.Form(
-        title="Test",
-        description="",
-        questions=[
-            form.QuestionChoice(
-                key="provider",
-                type="string",
-                title="Provider",
-                description="",
-                default="a",
-                options=[
-                    {"const": "a", "title": "A"},
-                    {"const": "b", "title": "B"},
-                ],
-            ),
-            form.Question(
-                key="secret",
-                type="string",
-                title="Secret",
-                description="",
-                default="",
-                condition=[{"key": "provider", "value": "b"}],
-            ),
-        ],
-    )
+_CONDITION_SCHEMA = {
+    "properties": {
+        "provider": {
+            "type": "string",
+            "title": "Provider",
+            "default": "a",
+            "oneOf": [{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
+        },
+    },
+    "allOf": [
+        {
+            "if": {"properties": {"provider": {"const": "b"}}},
+            "then": {
+                "properties": {
+                    "secret": {"type": "string", "title": "Secret", "default": ""}
+                }
+            },
+        }
+    ],
+}
 
 
-def test_condition_satisfied_question_is_asked(render):
+def test_condition_satisfied_question_is_asked(make_form, render):
     """A conditional question should be asked when the condition is satisfied."""
-    frm = _conditional_form()
+    frm = make_form(_CONDITION_SCHEMA)
     assert render(frm, ["2", "mypassword"])["secret"] == "mypassword"
 
 
-def test_condition_not_satisfied_question_skipped(render):
+def test_condition_not_satisfied_question_skipped(make_form, render):
     """A conditional question should be skipped when the condition is not satisfied."""
-    frm = _conditional_form()
+    frm = make_form(_CONDITION_SCHEMA)
     assert "secret" not in render(frm, [""])
 
 
-def test_hidden_condition_satisfied_is_computed(render):
+def test_hidden_condition_satisfied_is_computed(make_form, render):
     """A hidden conditional question should be included when the condition is satisfied."""
-    frm = form.Form(
-        title="Test",
-        description="",
-        questions=[
-            form.QuestionChoice(
-                key="mode",
-                type="string",
-                title="Mode",
-                description="",
-                default="full",
-                options=[
+    frm = make_form({
+        "properties": {
+            "mode": {
+                "type": "string",
+                "title": "Mode",
+                "default": "full",
+                "oneOf": [
                     {"const": "full", "title": "Full"},
                     {"const": "lite", "title": "Lite"},
                 ],
-            ),
-            form.QuestionConstant(
-                key="flag",
-                type="string",
-                title="Flag",
-                description="",
-                default="enabled",
-                condition=[{"key": "mode", "value": "full"}],
-            ),
+            },
+        },
+        "allOf": [
+            {
+                "if": {"properties": {"mode": {"const": "full"}}},
+                "then": {
+                    "properties": {
+                        "flag": {
+                            "type": "string",
+                            "title": "Flag",
+                            "format": "constant",
+                            "default": "enabled",
+                        }
+                    }
+                },
+            }
         ],
-    )
+    })
     assert render(frm, [""])["flag"] == "enabled"
 
 
-def test_hidden_condition_not_satisfied_skipped(render):
+def test_hidden_condition_not_satisfied_skipped(make_form, render):
     """A hidden conditional question should be skipped when the condition is not satisfied."""
-    frm = form.Form(
-        title="Test",
-        description="",
-        questions=[
-            form.QuestionChoice(
-                key="mode",
-                type="string",
-                title="Mode",
-                description="",
-                default="full",
-                options=[
+    frm = make_form({
+        "properties": {
+            "mode": {
+                "type": "string",
+                "title": "Mode",
+                "default": "full",
+                "oneOf": [
                     {"const": "full", "title": "Full"},
                     {"const": "lite", "title": "Lite"},
                 ],
-            ),
-            form.QuestionConstant(
-                key="flag",
-                type="string",
-                title="Flag",
-                description="",
-                default="enabled",
-                condition=[{"key": "mode", "value": "lite"}],
-            ),
+            },
+        },
+        "allOf": [
+            {
+                "if": {"properties": {"mode": {"const": "lite"}}},
+                "then": {
+                    "properties": {
+                        "flag": {
+                            "type": "string",
+                            "title": "Flag",
+                            "format": "constant",
+                            "default": "enabled",
+                        }
+                    }
+                },
+            }
         ],
-    )
+    })
     assert "flag" not in render(frm, [""])
 
 
