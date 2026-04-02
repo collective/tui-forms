@@ -1,4 +1,5 @@
 from tui_forms import form
+from tui_forms.parser import jsonschema_to_form
 from tui_forms.renderer.base import BaseRenderer
 from tui_forms.renderer.stdlib import StdlibRenderer
 from typing import Any
@@ -15,12 +16,30 @@ def renderer_klass() -> type[BaseRenderer]:
 
 
 @pytest.fixture
-def make_form():
-    """Return a factory that builds a minimal Form from positional question arguments."""
+def make_questions():
+    """Return a factory that parses a JSONSchema dict into a list of questions."""
 
-    def factory(*questions: form.BaseQuestion) -> form.Form:
-        """Build a Form from positional question arguments."""
-        return form.Form(title="Test", description="", questions=list(questions))
+    def factory(schema: dict[str, Any]) -> list[form.BaseQuestion]:
+        """Parse a JSONSchema and return the resulting questions."""
+        parsed = jsonschema_to_form(schema)
+        return parsed.questions
+
+    return factory
+
+
+@pytest.fixture
+def make_form(make_questions):
+    """Return a factory that builds a Form from a JSONSchema dict."""
+
+    def factory(schema: dict[str, Any], *, root_key: str = "") -> form.Form:
+        """Build a Form from a JSONSchema dict."""
+        questions = make_questions(schema)
+        return form.Form(
+            title=schema.get("title", "Test"),
+            description=schema.get("description", ""),
+            questions=questions,
+            root_key=root_key,
+        )
 
     return factory
 

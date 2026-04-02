@@ -1,0 +1,1 @@
+Fixed computed field filtering on review-retry when root_key is set; stale computed values no longer leak through because the filter now operates on the inner dict. @ericof

@@ -31,11 +31,9 @@ def render():
 )
 def test_ask_string(make_form, render, default, user_input, expected):
     """String questions should return user input or fall back to the default."""
-    frm = make_form(
-        form.Question(
-            key="x", type="string", title="X", description="", default=default
-        )
-    )
+    frm = make_form({
+        "properties": {"x": {"type": "string", "title": "X", "default": default}}
+    })
     assert render(frm, [user_input])["x"] == expected
 
 
@@ -45,22 +43,18 @@ def test_ask_string(make_form, render, default, user_input, expected):
 @pytest.mark.parametrize("user_input", ["y", "yes"])
 def test_boolean_affirmative_returns_true(make_form, render, user_input):
     """Affirmative boolean inputs should return True."""
-    frm = make_form(
-        form.QuestionBoolean(
-            key="b", type="boolean", title="B", description="", default=False
-        )
-    )
+    frm = make_form({
+        "properties": {"b": {"type": "boolean", "title": "B", "default": False}}
+    })
     assert render(frm, [user_input])["b"] is True
 
 
 @pytest.mark.parametrize("user_input", ["n", "no"])
 def test_boolean_negative_returns_false(make_form, render, user_input):
     """Negative boolean inputs should return False."""
-    frm = make_form(
-        form.QuestionBoolean(
-            key="b", type="boolean", title="B", description="", default=True
-        )
-    )
+    frm = make_form({
+        "properties": {"b": {"type": "boolean", "title": "B", "default": True}}
+    })
     assert render(frm, [user_input])["b"] is False
 
 
@@ -73,31 +67,25 @@ def test_boolean_negative_returns_false(make_form, render, user_input):
 )
 def test_boolean_empty_uses_default(make_form, render, default, expected):
     """Empty boolean input should fall back to the question default."""
-    frm = make_form(
-        form.QuestionBoolean(
-            key="b", type="boolean", title="B", description="", default=default
-        )
-    )
+    frm = make_form({
+        "properties": {"b": {"type": "boolean", "title": "B", "default": default}}
+    })
     assert render(frm, [""])["b"] is expected
 
 
 def test_boolean_invalid_input_retries(make_form, render):
     """Invalid boolean input should prompt again until a valid answer is given."""
-    frm = make_form(
-        form.QuestionBoolean(
-            key="b", type="boolean", title="B", description="", default=True
-        )
-    )
+    frm = make_form({
+        "properties": {"b": {"type": "boolean", "title": "B", "default": True}}
+    })
     assert render(frm, ["maybe", "n"])["b"] is False
 
 
 def test_boolean_invalid_input_prints_error(make_form):
     """Invalid boolean input should print an error message before re-prompting."""
-    frm = make_form(
-        form.QuestionBoolean(
-            key="b", type="boolean", title="B", description="", default=True
-        )
-    )
+    frm = make_form({
+        "properties": {"b": {"type": "boolean", "title": "B", "default": True}}
+    })
     with (
         patch("builtins.input", side_effect=["oops", "y"]) as _inp,
         patch("builtins.print") as mock_print,
@@ -110,6 +98,18 @@ def test_boolean_invalid_input_prints_error(make_form):
 # --- Choice question tests ---
 
 
+_CHOICE_SCHEMA = {
+    "properties": {
+        "c": {
+            "type": "string",
+            "title": "C",
+            "default": "a",
+            "oneOf": [{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
+        }
+    }
+}
+
+
 @pytest.mark.parametrize(
     "user_input,expected",
     [
@@ -120,46 +120,19 @@ def test_boolean_invalid_input_prints_error(make_form):
 )
 def test_ask_choice(make_form, render, user_input, expected):
     """Choice questions should return the option matching the entered number or the default."""
-    frm = make_form(
-        form.QuestionChoice(
-            key="c",
-            type="string",
-            title="C",
-            description="",
-            default="a",
-            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
-        )
-    )
+    frm = make_form(_CHOICE_SCHEMA)
     assert render(frm, [user_input])["c"] == expected
 
 
 def test_choice_invalid_input_retries(make_form, render):
     """Invalid choice input should prompt again until a valid answer is given."""
-    frm = make_form(
-        form.QuestionChoice(
-            key="c",
-            type="string",
-            title="C",
-            description="",
-            default="a",
-            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
-        )
-    )
+    frm = make_form(_CHOICE_SCHEMA)
     assert render(frm, ["99", "2"])["c"] == "b"
 
 
 def test_choice_invalid_input_prints_error(make_form):
     """Invalid choice input should print an error message before re-prompting."""
-    frm = make_form(
-        form.QuestionChoice(
-            key="c",
-            type="string",
-            title="C",
-            description="",
-            default="a",
-            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
-        )
-    )
+    frm = make_form(_CHOICE_SCHEMA)
     with (
         patch("builtins.input", side_effect=["99", "1"]),
         patch("builtins.print") as mock_print,
@@ -172,6 +145,23 @@ def test_choice_invalid_input_prints_error(make_form):
 # --- Multiple question tests ---
 
 
+_MULTIPLE_SCHEMA = {
+    "properties": {
+        "m": {
+            "type": "array",
+            "title": "M",
+            "default": ["a"],
+            "items": {
+                "oneOf": [
+                    {"const": "a", "title": "A"},
+                    {"const": "b", "title": "B"},
+                ]
+            },
+        }
+    }
+}
+
+
 @pytest.mark.parametrize(
     "user_input,expected",
     [
@@ -182,46 +172,19 @@ def test_choice_invalid_input_prints_error(make_form):
 )
 def test_ask_multiple(make_form, render, user_input, expected):
     """Multiple questions should return selected options or the default on empty input."""
-    frm = make_form(
-        form.QuestionMultiple(
-            key="m",
-            type="array",
-            title="M",
-            description="",
-            default=["a"],
-            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
-        )
-    )
+    frm = make_form(_MULTIPLE_SCHEMA)
     assert render(frm, [user_input])["m"] == expected
 
 
 def test_multiple_invalid_input_retries(make_form, render):
     """Invalid multiple-choice input should prompt again until a valid answer is given."""
-    frm = make_form(
-        form.QuestionMultiple(
-            key="m",
-            type="array",
-            title="M",
-            description="",
-            default=["a"],
-            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
-        )
-    )
+    frm = make_form(_MULTIPLE_SCHEMA)
     assert render(frm, ["99", "1"])["m"] == ["a"]
 
 
 def test_multiple_invalid_input_prints_error(make_form):
     """Invalid multiple-choice input should print an error message before re-prompting."""
-    frm = make_form(
-        form.QuestionMultiple(
-            key="m",
-            type="array",
-            title="M",
-            description="",
-            default=["a"],
-            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
-        )
-    )
+    frm = make_form(_MULTIPLE_SCHEMA)
     with (
         patch("builtins.input", side_effect=["99", "1"]),
         patch("builtins.print") as mock_print,
@@ -236,45 +199,48 @@ def test_multiple_invalid_input_prints_error(make_form):
 
 def test_constant_question_value(make_form, render):
     """A QuestionConstant should always return its raw default value."""
-    frm = make_form(
-        form.QuestionConstant(
-            key="c", type="string", title="C", description="", default="fixed"
-        )
-    )
+    frm = make_form({
+        "properties": {
+            "c": {
+                "type": "string",
+                "title": "C",
+                "format": "constant",
+                "default": "fixed",
+            }
+        }
+    })
     assert render(frm, [])["c"] == "fixed"
 
 
 def test_computed_question_uses_answers(make_form, render):
     """A QuestionComputed should render its default template against prior answers."""
-    frm = make_form(
-        form.Question(
-            key="name", type="string", title="Name", description="", default="World"
-        ),
-        form.QuestionComputed(
-            key="greeting",
-            type="string",
-            title="Greeting",
-            description="",
-            default="Hello {{ name }}!",
-        ),
-    )
+    frm = make_form({
+        "properties": {
+            "name": {"type": "string", "title": "Name", "default": "World"},
+            "greeting": {
+                "type": "string",
+                "title": "Greeting",
+                "format": "computed",
+                "default": "Hello {{ name }}!",
+            },
+        }
+    })
     assert render(frm, ["Alice"])["greeting"] == "Hello Alice!"
 
 
 def test_hidden_questions_not_in_user_inputs(make_form, render):
     """Hidden questions should not consume any input() calls."""
-    frm = make_form(
-        form.Question(
-            key="name", type="string", title="Name", description="", default="World"
-        ),
-        form.QuestionConstant(
-            key="version",
-            type="string",
-            title="Version",
-            description="",
-            default="1.0",
-        ),
-    )
+    frm = make_form({
+        "properties": {
+            "name": {"type": "string", "title": "Name", "default": "World"},
+            "version": {
+                "type": "string",
+                "title": "Version",
+                "format": "constant",
+                "default": "1.0",
+            },
+        }
+    })
     # Only one input() call expected (for "name"), not for "version"
     answers = render(frm, ["Alice"])
     assert answers["name"] == "Alice"
@@ -282,102 +248,107 @@ def test_hidden_questions_not_in_user_inputs(make_form, render):
 
 
 # --- Condition tests ---
+# Note: conditions use direct Form construction because the parser does not yet
+# support top-level allOf/if/then (see issue #20).
 
 
-def test_condition_satisfied_question_is_asked(make_form, render):
-    """A conditional question should be asked when the condition is satisfied."""
-    frm = make_form(
-        form.QuestionChoice(
-            key="provider",
-            type="string",
-            title="Provider",
-            description="",
-            default="a",
-            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
-        ),
-        form.Question(
-            key="secret",
-            type="string",
-            title="Secret",
-            description="",
-            default="",
-            condition=[{"key": "provider", "value": "b"}],
-        ),
+def _conditional_form() -> form.Form:
+    """Build a form with a conditional question for condition tests."""
+    return form.Form(
+        title="Test",
+        description="",
+        questions=[
+            form.QuestionChoice(
+                key="provider",
+                type="string",
+                title="Provider",
+                description="",
+                default="a",
+                options=[
+                    {"const": "a", "title": "A"},
+                    {"const": "b", "title": "B"},
+                ],
+            ),
+            form.Question(
+                key="secret",
+                type="string",
+                title="Secret",
+                description="",
+                default="",
+                condition=[{"key": "provider", "value": "b"}],
+            ),
+        ],
     )
+
+
+def test_condition_satisfied_question_is_asked(render):
+    """A conditional question should be asked when the condition is satisfied."""
+    frm = _conditional_form()
     assert render(frm, ["2", "mypassword"])["secret"] == "mypassword"
 
 
-def test_condition_not_satisfied_question_skipped(make_form, render):
+def test_condition_not_satisfied_question_skipped(render):
     """A conditional question should be skipped when the condition is not satisfied."""
-    frm = make_form(
-        form.QuestionChoice(
-            key="provider",
-            type="string",
-            title="Provider",
-            description="",
-            default="a",
-            options=[{"const": "a", "title": "A"}, {"const": "b", "title": "B"}],
-        ),
-        form.Question(
-            key="secret",
-            type="string",
-            title="Secret",
-            description="",
-            default="",
-            condition=[{"key": "provider", "value": "b"}],
-        ),
-    )
+    frm = _conditional_form()
     assert "secret" not in render(frm, [""])
 
 
-def test_hidden_condition_satisfied_is_computed(make_form, render):
+def test_hidden_condition_satisfied_is_computed(render):
     """A hidden conditional question should be included when the condition is satisfied."""
-    frm = make_form(
-        form.QuestionChoice(
-            key="mode",
-            type="string",
-            title="Mode",
-            description="",
-            default="full",
-            options=[
-                {"const": "full", "title": "Full"},
-                {"const": "lite", "title": "Lite"},
-            ],
-        ),
-        form.QuestionConstant(
-            key="flag",
-            type="string",
-            title="Flag",
-            description="",
-            default="enabled",
-            condition=[{"key": "mode", "value": "full"}],
-        ),
+    frm = form.Form(
+        title="Test",
+        description="",
+        questions=[
+            form.QuestionChoice(
+                key="mode",
+                type="string",
+                title="Mode",
+                description="",
+                default="full",
+                options=[
+                    {"const": "full", "title": "Full"},
+                    {"const": "lite", "title": "Lite"},
+                ],
+            ),
+            form.QuestionConstant(
+                key="flag",
+                type="string",
+                title="Flag",
+                description="",
+                default="enabled",
+                condition=[{"key": "mode", "value": "full"}],
+            ),
+        ],
     )
     assert render(frm, [""])["flag"] == "enabled"
 
 
-def test_hidden_condition_not_satisfied_skipped(make_form, render):
+def test_hidden_condition_not_satisfied_skipped(render):
     """A hidden conditional question should be skipped when the condition is not satisfied."""
-    frm = make_form(
-        form.QuestionChoice(
-            key="mode",
-            type="string",
-            title="Mode",
-            description="",
-            default="full",
-            options=[
-                {"const": "full", "title": "Full"},
-                {"const": "lite", "title": "Lite"},
-            ],
-        ),
-        form.QuestionConstant(
-            key="flag",
-            type="string",
-            title="Flag",
-            description="",
-            default="enabled",
-            condition=[{"key": "mode", "value": "lite"}],
-        ),
+    frm = form.Form(
+        title="Test",
+        description="",
+        questions=[
+            form.QuestionChoice(
+                key="mode",
+                type="string",
+                title="Mode",
+                description="",
+                default="full",
+                options=[
+                    {"const": "full", "title": "Full"},
+                    {"const": "lite", "title": "Lite"},
+                ],
+            ),
+            form.QuestionConstant(
+                key="flag",
+                type="string",
+                title="Flag",
+                description="",
+                default="enabled",
+                condition=[{"key": "mode", "value": "lite"}],
+            ),
+        ],
     )
     assert "flag" not in render(frm, [""])
 
@@ -387,31 +358,18 @@ def test_hidden_condition_not_satisfied_skipped(make_form, render):
 
 def test_subquestions_are_asked(make_form, render):
     """Subquestions of an object question should all be asked."""
-    frm = make_form(
-        form.Question(
-            key="obj",
-            type="object",
-            title="Object",
-            description="",
-            default=None,
-            subquestions=[
-                form.Question(
-                    key="sub1",
-                    type="string",
-                    title="Sub1",
-                    description="",
-                    default="a",
-                ),
-                form.Question(
-                    key="sub2",
-                    type="string",
-                    title="Sub2",
-                    description="",
-                    default="b",
-                ),
-            ],
-        )
-    )
+    frm = make_form({
+        "properties": {
+            "obj": {
+                "type": "object",
+                "title": "Object",
+                "properties": {
+                    "sub1": {"type": "string", "title": "Sub1", "default": "a"},
+                    "sub2": {"type": "string", "title": "Sub2", "default": "b"},
+                },
+            }
+        }
+    })
     answers = render(frm, ["x", "y"])
     assert answers["sub1"] == "x"
     assert answers["sub2"] == "y"
@@ -419,24 +377,17 @@ def test_subquestions_are_asked(make_form, render):
 
 def test_object_parent_key_not_in_answers(make_form, render):
     """The parent key of an object question should not appear in the answers dict."""
-    frm = make_form(
-        form.Question(
-            key="obj",
-            type="object",
-            title="Object",
-            description="",
-            default=None,
-            subquestions=[
-                form.Question(
-                    key="sub1",
-                    type="string",
-                    title="Sub1",
-                    description="",
-                    default="a",
-                ),
-            ],
-        )
-    )
+    frm = make_form({
+        "properties": {
+            "obj": {
+                "type": "object",
+                "title": "Object",
+                "properties": {
+                    "sub1": {"type": "string", "title": "Sub1", "default": "a"},
+                },
+            }
+        }
+    })
     answers = render(frm, [""])
     assert "obj" not in answers
     assert "sub1" in answers
@@ -445,54 +396,67 @@ def test_object_parent_key_not_in_answers(make_form, render):
 # --- Validator tests ---
 
 
-def test_valid_answer_is_accepted(make_form, render):
+def test_valid_answer_is_accepted(render):
     """A passing validator should accept the answer without retrying."""
-    frm = make_form(
-        form.Question(
-            key="x",
-            type="string",
-            title="X",
-            description="",
-            default="",
-            validator=lambda v: v.startswith("a"),
-        )
+    frm = form.Form(
+        title="Test",
+        description="",
+        questions=[
+            form.Question(
+                key="x",
+                type="string",
+                title="X",
+                description="",
+                default="",
+                validator=lambda v: v.startswith("a"),
+            )
+        ],
     )
     assert render(frm, ["apple"])["x"] == "apple"
 
 
-def test_invalid_answer_retries_until_valid(make_form, render):
+def test_invalid_answer_retries_until_valid(render):
     """A failing validator should cause the question to be re-asked."""
-    frm = make_form(
-        form.Question(
-            key="x",
-            type="string",
-            title="X",
-            description="",
-            default="",
-            validator=lambda v: v.startswith("a"),
-        )
+    frm = form.Form(
+        title="Test",
+        description="",
+        questions=[
+            form.Question(
+                key="x",
+                type="string",
+                title="X",
+                description="",
+                default="",
+                validator=lambda v: v.startswith("a"),
+            )
+        ],
     )
     assert render(frm, ["banana", "avocado"])["x"] == "avocado"
 
 
-def test_validation_error_message_is_displayed(make_form):
+def test_validation_error_message_is_displayed():
     """A ValidationError raised by the validator should display its message."""
     from tui_forms.form import ValidationError
 
     def strict_validator(value: str) -> bool:
+        """Validate that value starts with https://."""
         if not value.startswith("https://"):
             raise ValidationError("URL must start with https://")
         return True
 
-    frm = make_form(
-        form.Question(
-            key="url",
-            type="string",
-            title="URL",
-            description="",
-            default="",
-            validator=strict_validator,
-        )
+    frm = form.Form(
+        title="Test",
+        description="",
+        questions=[
+            form.Question(
+                key="url",
+                type="string",
+                title="URL",
+                description="",
+                default="",
+                validator=strict_validator,
+            )
+        ],
     )
     with (
         patch("builtins.input", side_effect=["http://bad.com", "https://ok.com"]),
@@ -506,16 +470,9 @@ def test_validation_error_message_is_displayed(make_form):
 
 def test_no_validator_accepts_any_answer(make_form, render):
     """Without a validator, any answer should be accepted."""
-    frm = make_form(
-        form.Question(
-            key="x",
-            type="string",
-            title="X",
-            description="",
-            default="",
-            validator=None,
-        )
-    )
+    frm = make_form({
+        "properties": {"x": {"type": "string", "title": "X", "default": ""}}
+    })
     assert render(frm, ["anything"])["x"] == "anything"
 
 
@@ -526,10 +483,12 @@ def test_no_validator_accepts_any_answer(make_form, render):
 
 def test_interactive_renderer_populates_user_answers(make_form):
     """Interactive renderers mark every user-facing question key as user-provided."""
-    frm = make_form(
-        form.Question(key="a", type="string", title="A", description="", default=""),
-        form.Question(key="b", type="string", title="B", description="", default=""),
-    )
+    frm = make_form({
+        "properties": {
+            "a": {"type": "string", "title": "A", "default": ""},
+            "b": {"type": "string", "title": "B", "default": ""},
+        }
+    })
     with patch("builtins.input", side_effect=["x", "y"]), patch("builtins.print"):
         StdlibRenderer(frm).render()
     assert frm._user_answers == {"a", "b"}
@@ -542,21 +501,19 @@ def test_interactive_renderer_populates_user_answers(make_form):
 
 def test_required_field_retries_on_empty(make_form, render):
     """A required string field should re-prompt when the user submits empty input."""
-    frm = make_form(
-        form.Question(
-            key="x", type="string", title="X", description="", default="", required=True
-        )
-    )
+    frm = make_form({
+        "required": ["x"],
+        "properties": {"x": {"type": "string", "title": "X", "default": ""}},
+    })
     assert render(frm, ["", "hello"])["x"] == "hello"
 
 
 def test_required_field_prints_error_on_empty(make_form):
     """A required string field should print an error message on empty input."""
-    frm = make_form(
-        form.Question(
-            key="x", type="string", title="X", description="", default="", required=True
-        )
-    )
+    frm = make_form({
+        "required": ["x"],
+        "properties": {"x": {"type": "string", "title": "X", "default": ""}},
+    })
     with (
         patch("builtins.input", side_effect=["", "hello"]),
         patch("builtins.print") as mock_print,
@@ -568,29 +525,24 @@ def test_required_field_prints_error_on_empty(make_form):
 
 def test_non_required_field_accepts_empty(make_form, render):
     """A non-required string field should accept empty input."""
-    frm = make_form(
-        form.Question(
-            key="x",
-            type="string",
-            title="X",
-            description="",
-            default="",
-            required=False,
-        )
-    )
+    frm = make_form({
+        "properties": {"x": {"type": "string", "title": "X", "default": ""}}
+    })
     assert render(frm, [""])["x"] == ""
 
 
 def test_hidden_field_not_in_user_answers(make_form):
     """Hidden computed fields are never added to _user_answers."""
-    frm = make_form(
-        form.Question(
-            key="name", type="string", title="Name", description="", default=""
-        ),
-        form.QuestionComputed(
-            key="slug", type="string", title="", description="", default="{{ name }}"
-        ),
-    )
+    frm = make_form({
+        "properties": {
+            "name": {"type": "string", "title": "Name", "default": ""},
+            "slug": {
+                "type": "string",
+                "format": "computed",
+                "default": "{{ name }}",
+            },
+        }
+    })
     with patch("builtins.input", side_effect=["alice"]), patch("builtins.print"):
         StdlibRenderer(frm).render()
     assert "name" in frm._user_answers
