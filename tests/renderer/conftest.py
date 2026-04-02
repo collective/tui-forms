@@ -3,6 +3,7 @@ from tui_forms.renderer.base import BaseRenderer
 from tui_forms.renderer.stdlib import StdlibRenderer
 from typing import Any
 from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -34,5 +35,36 @@ def render(renderer_klass):
         renderer._console = MagicMock()
         renderer._console.input.side_effect = inputs
         return renderer.render()
+
+    return factory
+
+
+@pytest.fixture
+def render_stdlib():
+    """Return a factory that renders a form via StdlibRenderer with patched input/print."""
+
+    def factory(
+        frm: form.Form, inputs: list[str], *, confirm: bool = False
+    ) -> dict[str, Any]:
+        """Render a form with preset stdin values and suppressed output."""
+        with patch("builtins.input", side_effect=inputs), patch("builtins.print"):
+            return StdlibRenderer(frm).render(confirm=confirm)
+
+    return factory
+
+
+@pytest.fixture
+def render_stdlib_capture_input():
+    """Return a factory that renders via StdlibRenderer and captures input() prompts."""
+
+    def factory(frm: form.Form, inputs: list[str]) -> tuple[dict[str, Any], list[str]]:
+        """Render a form and return (answers, list_of_input_prompts)."""
+        with (
+            patch("builtins.input", side_effect=inputs) as mock_input,
+            patch("builtins.print"),
+        ):
+            result = StdlibRenderer(frm).render()
+        prompts = [str(c.args[0]) if c.args else "" for c in mock_input.call_args_list]
+        return result, prompts
 
     return factory

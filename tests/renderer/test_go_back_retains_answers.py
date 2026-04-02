@@ -8,46 +8,11 @@ See: https://github.com/collective/tui-forms/issues/16
 """
 
 from tui_forms import form
-from tui_forms.renderer.stdlib import StdlibRenderer
-from typing import Any
-from unittest.mock import patch
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def make_form(*questions: form.BaseQuestion) -> form.Form:
-    """Build a minimal Form from positional questions."""
-    return form.Form(title="Test", description="", questions=list(questions))
-
-
-def render_stdlib(frm: form.Form, inputs: list[str]) -> dict[str, Any]:
-    """Render *frm* with a patched ``input()`` that returns *inputs* in order."""
-    with patch("builtins.input", side_effect=inputs), patch("builtins.print"):
-        return StdlibRenderer(frm).render()
-
-
-def render_stdlib_capture_input(
-    frm: form.Form, inputs: list[str]
-) -> tuple[dict[str, Any], list[str]]:
-    """Render *frm* and return (answers, list_of_input_prompts)."""
-    with (
-        patch("builtins.input", side_effect=inputs) as mock_input,
-        patch("builtins.print"),
-    ):
-        result = StdlibRenderer(frm).render()
-    prompts = [str(c.args[0]) if c.args else "" for c in mock_input.call_args_list]
-    return result, prompts
-
-
-# ---------------------------------------------------------------------------
-# Go-back retains user-entered string values
-# ---------------------------------------------------------------------------
-
-
-def test_go_back_shows_previous_answer_as_default():
+def test_go_back_shows_previous_answer_as_default(
+    make_form, render_stdlib_capture_input
+):
     """After going back, the prompt should show the user's previous answer,
     not the schema default."""
     frm = make_form(
@@ -74,7 +39,7 @@ def test_go_back_shows_previous_answer_as_default():
     )
 
 
-def test_go_back_enter_accepts_previous_answer():
+def test_go_back_enter_accepts_previous_answer(make_form, render_stdlib):
     """Pressing Enter after going back should accept the user's previous answer."""
     frm = make_form(
         form.Question(
@@ -88,13 +53,12 @@ def test_go_back_enter_accepts_previous_answer():
             key="name", type="string", title="Name", description="", default=""
         ),
     )
-    # Answer "custom", advance, go back, press Enter, answer name
     result = render_stdlib(frm, ["custom", "<", "", "Alice"])
     assert result["version"] == "custom"
     assert result["name"] == "Alice"
 
 
-def test_go_back_can_change_previous_answer():
+def test_go_back_can_change_previous_answer(make_form, render_stdlib):
     """Going back and typing a new value should replace the previous answer."""
     frm = make_form(
         form.Question(
@@ -108,18 +72,12 @@ def test_go_back_can_change_previous_answer():
             key="name", type="string", title="Name", description="", default=""
         ),
     )
-    # Answer "2.0.0", advance, go back, type "3.0.0", answer name
     result = render_stdlib(frm, ["2.0.0", "<", "3.0.0", "Alice"])
     assert result["version"] == "3.0.0"
     assert result["name"] == "Alice"
 
 
-# ---------------------------------------------------------------------------
-# Go-back retains choice values
-# ---------------------------------------------------------------------------
-
-
-def test_go_back_retains_choice_value():
+def test_go_back_retains_choice_value(make_form, render_stdlib):
     """After going back, a choice question should show the previous selection
     as the default."""
     frm = make_form(
@@ -145,12 +103,7 @@ def test_go_back_retains_choice_value():
     assert result["name"] == "Alice"
 
 
-# ---------------------------------------------------------------------------
-# Go-back retains boolean values
-# ---------------------------------------------------------------------------
-
-
-def test_go_back_retains_boolean_value():
+def test_go_back_retains_boolean_value(make_form, render_stdlib):
     """After going back, a boolean question should keep the user's previous answer."""
     frm = make_form(
         form.QuestionBoolean(
@@ -170,12 +123,7 @@ def test_go_back_retains_boolean_value():
     assert result["name"] == "Alice"
 
 
-# ---------------------------------------------------------------------------
-# Go-back retains multiple-choice values
-# ---------------------------------------------------------------------------
-
-
-def test_go_back_retains_multiple_values():
+def test_go_back_retains_multiple_values(make_form, render_stdlib):
     """After going back, a multiple-choice question should keep previous selections."""
     frm = make_form(
         form.QuestionMultiple(
@@ -200,12 +148,7 @@ def test_go_back_retains_multiple_values():
     assert result["name"] == "Alice"
 
 
-# ---------------------------------------------------------------------------
-# Go-back with conditional questions
-# ---------------------------------------------------------------------------
-
-
-def test_go_back_retains_answer_for_conditional_evaluation():
+def test_go_back_retains_answer_for_conditional_evaluation(make_form, render_stdlib):
     """The gating answer should remain so conditional questions stay visible
     after going back and re-accepting the same gating value."""
     frm = make_form(
@@ -240,12 +183,7 @@ def test_go_back_retains_answer_for_conditional_evaluation():
     assert result["name"] == "Alice"
 
 
-# ---------------------------------------------------------------------------
-# Three-question reproduction from issue description
-# ---------------------------------------------------------------------------
-
-
-def test_issue_16_reproduction():
+def test_issue_16_reproduction(make_form, render_stdlib):
     """Exact reproduction scenario from the issue description."""
     frm = make_form(
         form.Question(
