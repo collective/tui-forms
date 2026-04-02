@@ -68,6 +68,12 @@ class BaseRenderer(ABC):
             if current_initial:
                 self._form.answers.update(current_initial)
             self._ask_questions(self._form.questions)
+            # Remove stale answers for questions that became inactive
+            # (e.g. conditional questions whose gating answer changed
+            # after the user went back).
+            for question in self._form.iter_all():
+                if not question.hidden and not self._form.is_active(question):
+                    self._form.unrecord(question.key)
             for question in self._form.iter_all():
                 if question.hidden and self._form.is_active(question):
                     self._form.record(
@@ -211,8 +217,7 @@ class BaseRenderer(ABC):
                 answer = self._dispatch(next_q)
             except _GoBackRequest:
                 if history:
-                    prev_key = history.pop()
-                    self._form.unrecord(prev_key)
+                    history.pop()
                 continue
             self._form.record(next_q.key, answer, user_provided=self._user_provided)
             history.append(next_q.key)
