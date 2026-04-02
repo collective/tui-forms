@@ -14,7 +14,7 @@ from unittest.mock import patch
 # ---------------------------------------------------------------------------
 
 
-def test_back_on_second_question_rerenders_first(make_form, render_stdlib):
+def test_back_on_second_question_rerenders_first(make_form, render_form):
     """Typing ``<`` at question 2 should re-ask question 1."""
     frm = make_form({
         "properties": {
@@ -23,12 +23,12 @@ def test_back_on_second_question_rerenders_first(make_form, render_stdlib):
         }
     })
     # answer "first", go back, re-answer "corrected", then answer "second"
-    result = render_stdlib(frm, ["first", "<", "corrected", "second"])
+    result = render_form(frm, ["first", "<", "corrected", "second"])
     assert result["a"] == "corrected"
     assert result["b"] == "second"
 
 
-def test_back_on_first_question_stays_at_first(make_form, render_stdlib):
+def test_back_on_first_question_stays_at_first(make_form, render_form):
     """Typing ``<`` at the very first question should keep question 1 active."""
     frm = make_form({
         "properties": {
@@ -37,12 +37,12 @@ def test_back_on_first_question_stays_at_first(make_form, render_stdlib):
         }
     })
     # ``<`` at first question is a no-op; user answers normally on retry
-    result = render_stdlib(frm, ["<", "hello", "world"])
+    result = render_form(frm, ["<", "hello", "world"])
     assert result["a"] == "hello"
     assert result["b"] == "world"
 
 
-def test_back_multiple_times(make_form, render_stdlib):
+def test_back_multiple_times(make_form, render_form):
     """Going back multiple times should correctly re-ask earlier questions."""
     frm = make_form({
         "properties": {
@@ -52,7 +52,7 @@ def test_back_multiple_times(make_form, render_stdlib):
         }
     })
     # answer a, answer b, go back to b, go back to a, re-answer a, b, c
-    result = render_stdlib(
+    result = render_form(
         frm, ["first_a", "first_b", "<", "<", "final_a", "final_b", "final_c"]
     )
     assert result["a"] == "final_a"
@@ -65,7 +65,7 @@ def test_back_multiple_times(make_form, render_stdlib):
 # ---------------------------------------------------------------------------
 
 
-def test_back_from_boolean_rerenders_previous_string(make_form, render_stdlib):
+def test_back_from_boolean_rerenders_previous_string(make_form, render_form):
     """Going back from a boolean question should re-ask the previous string question."""
     frm = make_form({
         "properties": {
@@ -77,12 +77,12 @@ def test_back_from_boolean_rerenders_previous_string(make_form, render_stdlib):
             },
         }
     })
-    result = render_stdlib(frm, ["Alice", "<", "Bob", "y"])
+    result = render_form(frm, ["Alice", "<", "Bob", "y"])
     assert result["name"] == "Bob"
     assert result["confirm"] is True
 
 
-def test_back_from_choice_rerenders_previous_string(make_form, render_stdlib):
+def test_back_from_choice_rerenders_previous_string(make_form, render_form):
     """Going back from a choice question should re-ask the previous string question."""
     frm = make_form({
         "properties": {
@@ -98,12 +98,12 @@ def test_back_from_choice_rerenders_previous_string(make_form, render_stdlib):
             },
         }
     })
-    result = render_stdlib(frm, ["Alice", "<", "Bob", "2"])
+    result = render_form(frm, ["Alice", "<", "Bob", "2"])
     assert result["name"] == "Bob"
     assert result["role"] == "admin"
 
 
-def test_back_from_multiple_rerenders_previous_string(make_form, render_stdlib):
+def test_back_from_multiple_rerenders_previous_string(make_form, render_form):
     """Going back from a multiple question should re-ask the previous string question."""
     frm = make_form({
         "properties": {
@@ -121,7 +121,7 @@ def test_back_from_multiple_rerenders_previous_string(make_form, render_stdlib):
             },
         }
     })
-    result = render_stdlib(frm, ["Alice", "<", "Bob", "2"])
+    result = render_form(frm, ["Alice", "<", "Bob", "2"])
     assert result["name"] == "Bob"
     assert result["tags"] == ["b"]
 
@@ -161,28 +161,28 @@ _CONDITIONAL_SCHEMA = {
 }
 
 
-def test_back_past_gating_question_hides_conditional(make_form, render_stdlib):
+def test_back_past_gating_question_hides_conditional(make_form, render_form):
     """Going back twice from ``name`` through ``oidc_url`` to ``provider`` should hide
     the conditional question when a non-triggering value is re-selected."""
     frm = make_form(_CONDITIONAL_SCHEMA)
     # Choose "oidc" → answer oidc_url → answer name → go back to name's predecessor
     # (oidc_url) → go back again to provider → choose "local"
     # → oidc_url should be skipped → answer name
-    result = render_stdlib(frm, ["2", "https://example.com", "<", "<", "1", "Alice"])
+    result = render_form(frm, ["2", "https://example.com", "<", "<", "1", "Alice"])
     assert result["provider"] == "local"
     assert "oidc_url" not in result
     assert result["name"] == "Alice"
 
 
 def test_back_past_gating_question_shows_conditional_on_reselect(
-    make_form, render_stdlib
+    make_form, render_form
 ):
     """Going back from a non-conditional question to the gating question and
     re-selecting the triggering value should re-ask the conditional question."""
     frm = make_form(_CONDITIONAL_SCHEMA)
     # Choose "local" (oidc_url skipped) → answer name → go back to provider
     # (history only has "provider") → choose "oidc" → answer oidc_url → answer name
-    result = render_stdlib(frm, ["1", "<", "2", "https://oidc.example.com", "Alice"])
+    result = render_form(frm, ["1", "<", "2", "https://oidc.example.com", "Alice"])
     assert result["provider"] == "oidc"
     assert result["oidc_url"] == "https://oidc.example.com"
     assert result["name"] == "Alice"
@@ -229,7 +229,7 @@ def test_back_hint_shown_for_second_question(make_form):
 # ---------------------------------------------------------------------------
 
 
-def test_unrecorded_answer_not_in_result(make_form, render_stdlib):
+def test_unrecorded_answer_not_in_result(make_form, render_form):
     """An answer cleared by going back should not appear in the final result."""
     frm = make_form({
         "properties": {
@@ -237,7 +237,7 @@ def test_unrecorded_answer_not_in_result(make_form, render_stdlib):
             "b": {"type": "string", "title": "B", "default": ""},
         }
     })
-    result = render_stdlib(frm, ["first", "<", "second", "final_b"])
+    result = render_form(frm, ["first", "<", "second", "final_b"])
     assert result["a"] == "second"
     assert result["b"] == "final_b"
     # The first answer "first" was replaced; only the final values should appear
