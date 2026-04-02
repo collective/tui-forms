@@ -24,6 +24,7 @@ https://diataxis.fr/reference/
 
 public-api
 jsonschema-support
+pytest-fixtures
 base-renderer
 renderer-stdlib
 renderer-rich
@@ -38,6 +39,10 @@ renderer-noinput
 ## JSONSchema
 
 - {doc}`jsonschema-support`
+
+## Testing
+
+- {doc}`pytest-fixtures`
 
 ## Renderer API
 

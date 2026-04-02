@@ -1,0 +1,1 @@
+Fixed conditional questions from allOf/if/then being placed after all properties instead of right after their gating question. @ericof
