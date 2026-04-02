@@ -68,6 +68,12 @@ class BaseRenderer(ABC):
             if current_initial:
                 self._form.answers.update(current_initial)
             self._ask_questions(self._form.questions)
+            # Remove stale answers for questions that became inactive
+            # (e.g. conditional questions whose gating answer changed
+            # after the user went back).
+            for question in self._form.iter_all():
+                if not question.hidden and not self._form.is_active(question):
+                    self._form.unrecord(question.key)
             for question in self._form.iter_all():
                 if question.hidden and self._form.is_active(question):
                     self._form.record(
@@ -79,7 +85,12 @@ class BaseRenderer(ABC):
             answers = dict(self._form.answers)
             if not confirm or self.render_summary(self._form.user_answers):
                 return answers
-            current_initial = answers
+            # Exclude computed (hidden) fields so they are re-evaluated
+            # from scratch on the next pass using the updated answers.
+            computed_keys = {q.key for q in self._form.iter_all() if q.hidden}
+            current_initial = {
+                k: v for k, v in answers.items() if k not in computed_keys
+            }
 
     def render_summary(self, user_answers: dict[str, Any]) -> bool:
         """Display a summary of user-provided answers and ask for confirmation.
@@ -211,8 +222,7 @@ class BaseRenderer(ABC):
                 answer = self._dispatch(next_q)
             except _GoBackRequest:
                 if history:
-                    prev_key = history.pop()
-                    self._form.unrecord(prev_key)
+                    history.pop()
                 continue
             self._form.record(next_q.key, answer, user_provided=self._user_provided)
             history.append(next_q.key)

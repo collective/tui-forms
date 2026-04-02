@@ -18,7 +18,8 @@ __pycache__/
 .pytest_cache/
 
 # Agents
-.claude/settings.local.json
+.claude/*.local.json
+.claude/*.local.md
 
 # Virtual environments
 .venv
