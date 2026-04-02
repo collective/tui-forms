@@ -2002,6 +2002,9 @@ docs = [
 rich = [
     { name = "rich" },
 ]
+test = [
+    { name = "pytest" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -2013,6 +2016,7 @@ requires-dist = [
     { name = "myst-parser", marker = "extra == 'docs'" },
     { name = "plone-sphinx-theme", marker = "extra == 'docs'", specifier = ">=1.4.1" },
     { name = "pytest", marker = "extra == 'dev'" },
+    { name = "pytest", marker = "extra == 'test'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "rich", marker = "extra == 'rich'", specifier = ">=13.9.0" },
     { name = "sphinx-autobuild", marker = "extra == 'docs'" },
@@ -2033,7 +2037,7 @@ requires-dist = [
     { name = "zest-releaser", extras = ["recommended"], marker = "extra == 'dev'" },
     { name = "zestreleaser-towncrier", marker = "extra == 'dev'" },
 ]
-provides-extras = ["rich", "docs", "dev"]
+provides-extras = ["rich", "docs", "test", "dev"]
 
 [[package]]
 name = "twine"

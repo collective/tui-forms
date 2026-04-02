@@ -1,0 +1,1 @@
+Added pytest plugin with make_questions, make_form, render_form, and render_form_capture_input fixtures for downstream packages to test their wizard implementations. Install with tui-forms[test]. @ericof

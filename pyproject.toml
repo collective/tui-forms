@@ -54,6 +54,9 @@ docs = [
   "sphinxext-opengraph",
   "vale",
 ]
+test = [
+  "pytest",
+]
 dev = [
   "pytest",
   "pytest-cov",
@@ -70,6 +73,9 @@ Documentation = "https://collective.github.io/tui-forms/"
 
 [project.scripts]
 formdemo = 'tui_forms.demo.__main__:main'
+
+[project.entry-points."pytest11"]
+tui_forms = "tui_forms.fixtures.plugin"
 
 [project.entry-points."tui_forms.renderers"]
 stdlib = "tui_forms.renderer.stdlib:StdlibRenderer"
@@ -143,6 +149,11 @@ parallel = true
 omit = [
   "src/tui_forms/locales/*.py",
 ]
+
+[tool.coverage.report]
+skip_empty = true
+show_missing = true
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.mypy]
 ignore_missing_imports = true

@@ -101,7 +101,9 @@ test: $(VENV_FOLDER) ## run tests
 
 .PHONY: test-coverage
 test-coverage: $(VENV_FOLDER) ## run tests with coverage
-	@uv run pytest --cov=tui_forms --cov-report term-missing
+	@uv run coverage run -m pytest
+	@uv run coverage combine
+	@uv run coverage report
 
 
 ############################################

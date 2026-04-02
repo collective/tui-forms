@@ -24,6 +24,7 @@ https://diataxis.fr/how-to-guides/
 
 use-in-project
 create-renderer
+test-with-pytest-plugin
 contribute
 ```
 
@@ -31,6 +32,7 @@ contribute
 
 - {doc}`use-in-project`
 - {doc}`create-renderer`
+- {doc}`test-with-pytest-plugin`
 
 ## Contributing
 
