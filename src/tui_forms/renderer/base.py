@@ -85,7 +85,12 @@ class BaseRenderer(ABC):
             answers = dict(self._form.answers)
             if not confirm or self.render_summary(self._form.user_answers):
                 return answers
-            current_initial = answers
+            # Exclude computed (hidden) fields so they are re-evaluated
+            # from scratch on the next pass using the updated answers.
+            computed_keys = {q.key for q in self._form.iter_all() if q.hidden}
+            current_initial = {
+                k: v for k, v in answers.items() if k not in computed_keys
+            }
 
     def render_summary(self, user_answers: dict[str, Any]) -> bool:
         """Display a summary of user-provided answers and ask for confirmation.
