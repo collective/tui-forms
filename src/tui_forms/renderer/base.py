@@ -237,7 +237,6 @@ class BaseRenderer(ABC):
                     history.pop()
                 continue
             self._form.record(next_q.key, answer, user_provided=self._user_provided)
-            # print(f"DEBUG: Recorded {next_q.key}={answer} (root_key={self._form.root_key})")
             history.append(next_q.key)
 
     def _dispatch(self, question: form.BaseQuestion) -> Any:

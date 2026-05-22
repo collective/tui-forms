@@ -273,8 +273,6 @@ def _build_subquestions(
         seen_keys.add(sub_key)
 
     for allof_item in prop_schema.get("allOf", []):
-        import sys
-        print(f"DEBUG: Processing allOf item: {allof_item}", file=sys.stderr)
         then = allof_item.get("then")
         if not then:
             continue
