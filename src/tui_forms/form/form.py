@@ -26,8 +26,8 @@ class Form:
         """Return question data answered by the user."""
         answers = self.answers
         if root_key := self.root_key:
-            answers = answers[root_key]
-        user_answers = {k: answers[k] for k in self._user_answers}
+            answers = answers.get(root_key, {})
+        user_answers = {k: answers[k] for k in self._user_answers if k in answers}
         return user_answers
 
     @property
@@ -48,8 +48,11 @@ class Form:
         """
         if question.condition is None:
             return True
+        answers = self.answers
+        if self.root_key:
+            answers = answers.get(self.root_key, {})
         return all(
-            self.answers.get(cond["key"]) == cond["value"]
+            answers.get(cond["key"]) == cond["value"]
             for cond in question.condition
         )
 

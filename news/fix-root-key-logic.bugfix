@@ -1,0 +1,2 @@
+Fixed `Form.is_active` and `Form.user_answers` to correctly handle `root_key` nesting. Conditional questions now work properly when answers are nested under a common root key.
+Improved `renderer.render()` to support un-nested `initial_answers` by automatically recording them under the `root_key` if one is defined.

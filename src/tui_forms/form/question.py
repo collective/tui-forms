@@ -63,6 +63,9 @@ class BaseQuestion:
         current_value = (answers.get(root_key, {}) if root_key else answers).get(
             key, _NOVALUE
         )
+        import sys
+        if key == 'thumbor':
+             print(f"DEBUG: _render_variable({key}): root_key='{root_key}', found={current_value != _NOVALUE}, value={current_value}", file=sys.stderr)
         if current_value is _NOVALUE:
             value = template.render_variable(env, value, answers)
         else:
