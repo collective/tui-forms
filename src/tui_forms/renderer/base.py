@@ -65,44 +65,57 @@ class BaseRenderer(ABC):
         current_initial = initial_answers
         while True:
             self._form.start()
-            if current_initial:
-                # If root_key is set, and current_initial is not already nested
-                # under it, we should record them properly so they end up
-                # in the right place for is_active and other logic.
-                if self._form.root_key and self._form.root_key not in current_initial:
-                    for k, v in current_initial.items():
-                        self._form.record(k, v)
-                else:
-                    self._form.answers.update(current_initial)
+            self._apply_initial_answers(current_initial)
             self._ask_questions(self._form.questions)
-            # Remove stale answers for questions that became inactive
-            # (e.g. conditional questions whose gating answer changed
-            # after the user went back).
-            for question in self._form.iter_all():
-                if not question.hidden and not self._form.is_active(question):
-                    self._form.unrecord(question.key)
-            for question in self._form.iter_all():
-                if question.hidden and self._form.is_active(question):
-                    self._form.record(
-                        question.key,
-                        question.default_value(
-                            self._env, self._form.answers, self._form.root_key
-                        ),
-                    )
+            self._clean_up_inactive_answers()
+            self._record_hidden_answers()
             answers = dict(self._form.answers)
             if not confirm or self.render_summary(self._form.user_answers):
                 return answers
-            # Exclude computed (hidden) fields so they are re-evaluated
-            # from scratch on the next pass using the updated answers.
-            computed_keys = {q.key for q in self._form.iter_all() if q.hidden}
-            if self._form.root_key and self._form.root_key in answers:
-                inner = answers[self._form.root_key]
-                filtered = {k: v for k, v in inner.items() if k not in computed_keys}
-                current_initial = {self._form.root_key: filtered}
-            else:
-                current_initial = {
-                    k: v for k, v in answers.items() if k not in computed_keys
-                }
+            current_initial = self._get_initial_for_retry(answers)
+
+    def _apply_initial_answers(self, initial: dict[str, Any] | None) -> None:
+        """Apply initial answers to the form."""
+        if not initial:
+            return
+        # If root_key is set, and initial is not already nested
+        # under it, we should record them properly so they end up
+        # in the right place for is_active and other logic.
+        if self._form.root_key and self._form.root_key not in initial:
+            for k, v in initial.items():
+                self._form.record(k, v)
+        else:
+            self._form.answers.update(initial)
+
+    def _clean_up_inactive_answers(self) -> None:
+        """Remove stale answers for questions that became inactive."""
+        # (e.g. conditional questions whose gating answer changed
+        # after the user went back).
+        for question in self._form.iter_all():
+            if not question.hidden and not self._form.is_active(question):
+                self._form.unrecord(question.key)
+
+    def _record_hidden_answers(self) -> None:
+        """Compute and record values for active hidden questions."""
+        for question in self._form.iter_all():
+            if question.hidden and self._form.is_active(question):
+                self._form.record(
+                    question.key,
+                    question.default_value(
+                        self._env, self._form.answers, self._form.root_key
+                    ),
+                )
+
+    def _get_initial_for_retry(self, answers: dict[str, Any]) -> dict[str, Any]:
+        """Prepare initial answers for a form restart after review."""
+        # Exclude computed (hidden) fields so they are re-evaluated
+        # from scratch on the next pass using the updated answers.
+        computed_keys = {q.key for q in self._form.iter_all() if q.hidden}
+        if self._form.root_key and self._form.root_key in answers:
+            inner = answers[self._form.root_key]
+            filtered = {k: v for k, v in inner.items() if k not in computed_keys}
+            return {self._form.root_key: filtered}
+        return {k: v for k, v in answers.items() if k not in computed_keys}
 
     def render_summary(self, user_answers: dict[str, Any]) -> bool:
         """Display a summary of user-provided answers and ask for confirmation.
