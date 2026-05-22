@@ -1,0 +1,1 @@
+Refactored `BaseRenderer.render` to reduce cyclomatic complexity and removed leftover debug log statements. @erral

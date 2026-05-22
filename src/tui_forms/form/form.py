@@ -52,8 +52,7 @@ class Form:
         if self.root_key:
             answers = answers.get(self.root_key, {})
         return all(
-            answers.get(cond["key"]) == cond["value"]
-            for cond in question.condition
+            answers.get(cond["key"]) == cond["value"] for cond in question.condition
         )
 
     def start(self) -> None:
