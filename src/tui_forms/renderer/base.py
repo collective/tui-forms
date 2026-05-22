@@ -66,7 +66,14 @@ class BaseRenderer(ABC):
         while True:
             self._form.start()
             if current_initial:
-                self._form.answers.update(current_initial)
+                # If root_key is set, and current_initial is not already nested
+                # under it, we should record them properly so they end up
+                # in the right place for is_active and other logic.
+                if self._form.root_key and self._form.root_key not in current_initial:
+                    for k, v in current_initial.items():
+                        self._form.record(k, v)
+                else:
+                    self._form.answers.update(current_initial)
             self._ask_questions(self._form.questions)
             # Remove stale answers for questions that became inactive
             # (e.g. conditional questions whose gating answer changed
@@ -230,6 +237,7 @@ class BaseRenderer(ABC):
                     history.pop()
                 continue
             self._form.record(next_q.key, answer, user_provided=self._user_provided)
+            # print(f"DEBUG: Recorded {next_q.key}={answer} (root_key={self._form.root_key})")
             history.append(next_q.key)
 
     def _dispatch(self, question: form.BaseQuestion) -> Any:
