@@ -9,6 +9,19 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.0a5 (2026-05-23)
+
+
+### Bug fixes:
+
+- Fixed `Form.is_active` and `Form.user_answers` to correctly handle `root_key` nesting. Conditional questions now work properly when answers are nested under a common root key.
+  Improved `renderer.render()` to support un-nested `initial_answers` by automatically recording them under the `root_key` if one is defined. @erral [#23](https://github.com/collective/tui-forms/issues/23)
+
+
+### Internal:
+
+- Refactored `BaseRenderer.render` to reduce cyclomatic complexity and removed leftover debug log statements. @erral [#24](https://github.com/collective/tui-forms/issues/24)
+
 ## 1.0.0a4 (2026-04-02)
 
 
