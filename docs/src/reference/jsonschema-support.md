@@ -230,6 +230,40 @@ Each `if` block follows the pattern `{properties: {key: {const: value}}}`.
 When the user's answer for `key` equals `value`, the `then` questions become active.
 Multiple key-value pairs in a single `if` block are supported; all conditions must match for the `then` questions to become active.
 
+### Overriding and reordering properties
+
+TUI Forms allows you to redefine a property inside a `then` block that was already declared in the main `properties` block.
+
+When the condition is met, the definition from the `then` block is merged with the base definition. This is useful for:
+
+- **Changing defaults**: Update the suggested value based on a previous choice.
+- **Hiding fields**: Use `format: computed` in the `then` block to conditionally hide a field that is usually user-facing.
+- **Relocation**: Redefining a property in `allOf` automatically moves it in the wizard flow to appear immediately after its gating question.
+
+```json
+{
+  "properties": {
+    "advanced_mode": {"type": "boolean", "default": false},
+    "expert_setting": {"type": "string", "default": "standard"}
+  },
+  "allOf": [
+    {
+      "if": { "properties": {"advanced_mode": {"const": false}} },
+      "then": {
+        "properties": {
+          "expert_setting": {
+            "format": "computed",
+            "default": "standard"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+In the example above, `expert_setting` is normally asked. If `advanced_mode` is *No*, it is overridden to be a hidden computed field and skipped.
+
 ```json
 {
   "properties": {
