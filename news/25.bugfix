@@ -1,0 +1,1 @@
+Fix parser to allow overriding unconditional properties from main properties block within allOf/then blocks. This also enables multiple conditional definitions for the same key, fixing visibility issues in complex schemas. @erral

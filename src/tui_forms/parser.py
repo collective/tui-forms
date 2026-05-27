@@ -258,7 +258,7 @@ def _build_subquestions(
 
     Collects direct property subquestions, then inserts conditional
     subquestions from allOf/if/then blocks right after their gating
-    question, skipping duplicate keys.
+    question.
     """
     subquestions: list[form.BaseQuestion] = []
     seen_keys: set[str] = set()
@@ -283,17 +283,28 @@ def _build_subquestions(
         gating_key = question_condition[0]["key"] if question_condition else ""
         insert_at = _find_insert_index(subquestions, gating_key)
         for sub_key, sub_prop in then.get("properties", {}).items():
-            if sub_key not in seen_keys:
-                sq = _parse_property(
-                    sub_key,
-                    sub_prop,
-                    schema,
-                    condition=question_condition,
-                    required=sub_key in then_required,
-                )
-                subquestions.insert(insert_at, sq)
-                insert_at += 1
-                seen_keys.add(sub_key)
+            # Merge with base properties definition if it exists
+            base_prop = prop_schema.get("properties", {}).get(sub_key, {})
+            merged_prop = {**base_prop, **sub_prop}
+
+            # If there's an UNCONDITIONAL version of this key, replace it.
+            # This allows making an existing property conditional.
+            for i, q in enumerate(subquestions):
+                if q.key == sub_key and q.condition is None:
+                    subquestions.pop(i)
+                    if i < insert_at:
+                        insert_at -= 1
+                    break
+
+            sq = _parse_property(
+                sub_key,
+                merged_prop,
+                schema,
+                condition=question_condition,
+                required=sub_key in then_required or sub_key in required_keys,
+            )
+            subquestions.insert(insert_at, sq)
+            insert_at += 1
 
     return subquestions
 
@@ -383,7 +394,7 @@ def jsonschema_to_form(schema: dict[str, Any], root_key: str = "") -> form.Form:
     """Convert a JSON Schema to a Form instance.
 
     :param schema: The JSON Schema to convert.
-    :param root_key: Optional root key to nest all answers under in the final dict.
+    :param root_key: Optional root_key to nest all answers under in the final dict.
     :raises jsonschema.ValidationError: If the schema does not conform to the
         expected form structure.
     :return: The parsed form definition.

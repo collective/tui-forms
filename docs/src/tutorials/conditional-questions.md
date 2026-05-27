@@ -171,6 +171,50 @@ Each item is evaluated independently:
 ]
 ```
 
+## Conditionally overriding existing questions
+
+You can also use `allOf` to override properties already defined in the base `properties` block. This is useful for conditionally hiding a field or changing its default value.
+
+### Hiding a question
+
+If you have a question that should only be asked in certain modes, you can define it normally and then override it with `format: computed` when it should be hidden:
+
+```python
+schema = {
+    "properties": {
+        "advanced_settings": {
+            "type": "boolean",
+            "title": "Enable advanced settings?",
+            "default": False
+        },
+        "expert_mode": {
+            "type": "boolean",
+            "title": "Enable expert mode?",
+            "default": False
+        }
+    },
+    "allOf": [
+        {
+            "if": {"properties": {"advanced_settings": {"const": False}}},
+            "then": {
+                "properties": {
+                    "expert_mode": {
+                        "format": "computed",
+                        "default": False
+                    }
+                }
+            }
+        }
+    ]
+}
+```
+
+In this case, `expert_mode` is only asked if the user selects *Yes* for `advanced_settings`. Otherwise, it is computed as `False` and skipped.
+
+### Relocation behavior
+
+When you override a property in an `allOf` block, TUI Forms automatically moves it in the wizard flow to appear right after the question that gates it. This ensures that the user answers dependencies in the correct order.
+
 ## Next steps
 
 - {doc}`hidden-fields`: derive values automatically from what the user answered.

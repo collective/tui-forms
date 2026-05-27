@@ -16,10 +16,17 @@ def plone_form(plone_schema):
     return jsonschema_to_form(plone_schema)
 
 
+def _questions(frm: form.Form, key: str) -> list[form.BaseQuestion]:
+    """Return all questions with the given key from a form."""
+    return [q for q in frm.questions if q.key == key]
+
+
 def _question(frm: form.Form, key: str) -> form.BaseQuestion:
-    """Return the question with the given key from a form."""
-    questions = {q.key: q for q in frm.questions}
-    return questions[key]
+    """Return the first question with the given key from a form."""
+    qs = _questions(frm, key)
+    if not qs:
+        raise KeyError(key)
+    return qs[0]
 
 
 def _subquestion(frm: form.Form, parent_key: str, key: str) -> form.BaseQuestion | None:
@@ -247,9 +254,10 @@ def test_authentication_conditional_subquestion_present(plone_form, key):
 
 
 def test_authentication_no_duplicate_subquestions(plone_form):
-    """authentication should have no duplicate subquestion keys."""
-    sub_keys = [sq.key for sq in _question(plone_form, "authentication").subquestions]
-    assert len(sub_keys) == len(set(sub_keys))
+    """authentication should have no duplicate subquestion keys if they are unconditional."""
+    sub_questions = _question(plone_form, "authentication").subquestions
+    unconditional_keys = [sq.key for sq in sub_questions if sq.condition is None]
+    assert len(unconditional_keys) == len(set(unconditional_keys))
 
 
 # --- Conditional subquestion condition tests ---
@@ -307,8 +315,8 @@ def test_top_level_allof_creates_conditional_questions(ifthen_form):
 )
 def test_top_level_allof_condition_values(ifthen_form, key, expected_condition):
     """Conditional questions from top-level allOf should carry the correct condition."""
-    q = _question(ifthen_form, key)
-    assert q.condition == expected_condition
+    qs = _questions(ifthen_form, key)
+    assert any(q.condition == expected_condition for q in qs)
 
 
 def test_top_level_allof_unconditional_question(ifthen_form):
@@ -319,6 +327,7 @@ def test_top_level_allof_unconditional_question(ifthen_form):
 
 def test_top_level_allof_required_propagated(ifthen_form):
     """Required keys from then blocks should propagate to the question."""
+    # Note: _question returns the first one (Cat version), which is required.
     food = _question(ifthen_form, "food")
     water = _question(ifthen_form, "water")
     assert food.required is True
@@ -332,7 +341,8 @@ def test_conditional_questions_placed_after_gating_question(ifthen_form):
     """Conditional questions should appear right after their gating question."""
     keys = [q.key for q in ifthen_form.questions]
     # animal is the gating question; food and water should follow it
-    assert keys == ["animal", "food", "water"]
+    # Since food is defined twice, it appears twice in the list
+    assert keys == ["animal", "food", "food", "water"]
 
 
 def test_conditional_subquestions_placed_after_gating_in_object():
