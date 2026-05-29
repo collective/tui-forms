@@ -9,6 +9,14 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.0b1 (2026-05-29)
+
+
+### Bug fixes:
+
+- Fix parser to allow overriding unconditional properties from main properties block within allOf/then blocks. This also enables multiple conditional definitions for the same key, fixing visibility issues in complex schemas. @erral [#25](https://github.com/collective/tui-forms/issues/25)
+- Update QuestionComputed and QuestionConstant to respect existing answers if provided in the context, preventing unnecessary recomputations when overrides are intended. @erral [#27](https://github.com/collective/tui-forms/issues/27)
+
 ## 1.0.0a5 (2026-05-23)
 
 
