@@ -60,11 +60,11 @@ class BaseQuestion:
         self, env: Environment, answers: dict[str, Any], value: Any, root_key: str = ""
     ) -> Any:
         key = self.key
-        current_value = (answers.get(root_key, {}) if root_key else answers).get(
-            key, _NOVALUE
-        )
+        current_answers = answers.get(root_key, {}) if root_key else answers
+        current_value = current_answers.get(key, _NOVALUE)
         if current_value is _NOVALUE:
-            value = template.render_variable(env, value, answers)
+            # print(f"DEBUG: Rendering {key} with answers keys: {list(current_answers.keys())} and root_key: {root_key}")
+            value = template.render_variable(env, value, current_answers, root_key=root_key)
         else:
             value = current_value
         return value
@@ -90,6 +90,10 @@ class QuestionComputed(QuestionHidden):
     def default_value(
         self, env: Environment, answers: dict[str, Any], root_key: str = ""
     ) -> Any:
+        current_answers = answers.get(root_key, {}) if root_key else answers
+        if (current_value := current_answers.get(self.key, _NOVALUE)) is not _NOVALUE:
+            return current_value
+
         val = (
             self.default["default"] if isinstance(self.default, dict) else self.default
         )
@@ -115,6 +119,9 @@ class QuestionConstant(QuestionHidden):
         self, env: Environment, answers: dict[str, Any], root_key: str = ""
     ) -> Any:
         """Return the raw constant value without rendering."""
+        current_answers = answers.get(root_key, {}) if root_key else answers
+        if (current_value := current_answers.get(self.key, _NOVALUE)) is not _NOVALUE:
+            return current_value
         return self.default
 
 
