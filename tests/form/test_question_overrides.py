@@ -5,7 +5,7 @@ from tui_forms.form.question import QuestionConstant
 
 def test_question_computed_respects_existing_answer():
     """Verify that QuestionComputed uses an existing answer if provided."""
-    env = Environment()
+    env = Environment(autoescape=True)
     q = QuestionComputed(
         key="test_key",
         type="string",
@@ -20,7 +20,7 @@ def test_question_computed_respects_existing_answer():
 
 def test_question_computed_computes_when_missing():
     """Verify that QuestionComputed computes the value when answer is missing."""
-    env = Environment()
+    env = Environment(autoescape=True)
     q = QuestionComputed(
         key="test_key",
         type="string",
@@ -34,7 +34,7 @@ def test_question_computed_computes_when_missing():
 
 def test_question_constant_respects_existing_answer():
     """Verify that QuestionConstant uses an existing answer if provided."""
-    env = Environment()
+    env = Environment(autoescape=True)
     q = QuestionConstant(
         key="test_key",
         type="string",
@@ -48,7 +48,7 @@ def test_question_constant_respects_existing_answer():
 
 def test_question_constant_uses_default_when_missing():
     """Verify that QuestionConstant uses the default when answer is missing."""
-    env = Environment()
+    env = Environment(autoescape=True)
     q = QuestionConstant(
         key="test_key",
         type="string",
@@ -62,7 +62,7 @@ def test_question_constant_uses_default_when_missing():
 
 def test_question_computed_with_root_key():
     """Verify QuestionComputed works with root_key nesting."""
-    env = Environment()
+    env = Environment(autoescape=True)
     q = QuestionComputed(
         key="test_key",
         type="string",

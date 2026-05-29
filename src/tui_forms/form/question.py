@@ -63,8 +63,9 @@ class BaseQuestion:
         current_answers = answers.get(root_key, {}) if root_key else answers
         current_value = current_answers.get(key, _NOVALUE)
         if current_value is _NOVALUE:
-            # print(f"DEBUG: Rendering {key} with answers keys: {list(current_answers.keys())} and root_key: {root_key}")
-            value = template.render_variable(env, value, current_answers, root_key=root_key)
+            value = template.render_variable(
+                env, value, current_answers, root_key=root_key
+            )
         else:
             value = current_value
         return value
