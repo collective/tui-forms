@@ -475,7 +475,7 @@ def test_interactive_renderer_populates_user_answers(make_form):
     })
     with patch("builtins.input", side_effect=["x", "y"]), patch("builtins.print"):
         StdlibRenderer(frm).render()
-    assert frm._user_answers == {"a", "b"}
+    assert frm._user_answers == ["a", "b"]
 
 
 # ---------------------------------------------------------------------------

@@ -156,7 +156,24 @@ def test_start_clears_user_answers(simple_form):
     """start() should clear _user_answers alongside answers."""
     simple_form.record("a", "hello", user_provided=True)
     simple_form.start()
-    assert simple_form._user_answers == set()
+    assert simple_form._user_answers == []
+
+
+def test_user_answers_preserves_record_order(simple_form):
+    """user_answers must reflect the order questions were answered, not hash order."""
+    # Record in a deliberately non-alphabetical order.
+    for key in ("delta", "alpha", "charlie", "bravo"):
+        simple_form.record(key, key, user_provided=True)
+    assert list(simple_form.user_answers) == ["delta", "alpha", "charlie", "bravo"]
+
+
+def test_record_user_provided_twice_keeps_first_position(simple_form):
+    """Re-recording an answer keeps its original position and avoids duplicates."""
+    simple_form.record("a", "first", user_provided=True)
+    simple_form.record("b", "x", user_provided=True)
+    simple_form.record("a", "updated", user_provided=True)
+    assert simple_form._user_answers == ["a", "b"]
+    assert list(simple_form.user_answers) == ["a", "b"]
 
 
 # ---------------------------------------------------------------------------

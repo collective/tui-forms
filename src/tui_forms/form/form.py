@@ -19,7 +19,7 @@ class Form:
     answers: dict[str, Any] = field(default_factory=dict)
     root_key: str = ""
     _question_index: int = field(default=0, init=False, repr=False)
-    _user_answers: set[str] = field(default_factory=set, init=False, repr=False)
+    _user_answers: list[str] = field(default_factory=list, init=False, repr=False)
 
     @property
     def user_answers(self) -> dict[str, Any]:
@@ -80,8 +80,8 @@ class Form:
                 answers[self.root_key] = {}
             answers = answers[self.root_key]
         answers[key] = value
-        if user_provided:
-            self._user_answers.add(key)
+        if user_provided and key not in self._user_answers:
+            self._user_answers.append(key)
 
     def set_question_index(self, n: int) -> None:
         """Set the question index directly.
@@ -99,7 +99,8 @@ class Form:
         if self.root_key:
             answers = answers.get(self.root_key, {})
         answers.pop(key, None)
-        self._user_answers.discard(key)
+        if key in self._user_answers:
+            self._user_answers.remove(key)
 
     def iter_all(self) -> Iterator[BaseQuestion]:
         """Yield every question and its subquestions depth-first.
