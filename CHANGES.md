@@ -9,6 +9,13 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.0b2 (2026-06-05)
+
+
+### Bug fixes:
+
+- Confirmation summary now lists answers in the order the questions were asked, instead of an arbitrary order. @ericof [#29](https://github.com/collective/tui-forms/issues/29)
+
 ## 1.0.0b1 (2026-05-29)
 
 
