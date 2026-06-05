@@ -316,7 +316,7 @@ def test_noinput_user_answers_is_empty_after_render():
         )
     )
     NoInputRenderer(frm).render()
-    assert frm._user_answers == set()
+    assert frm._user_answers == []
 
 
 def test_validation_error_raises_with_message():
